@@ -65,7 +65,8 @@
 
 ## 4. Master Promotion & Living Documentation Protocol
 - **Staging Validation Gate:** All changes must be deployed and validated in the develop staging containers (`develop2` on ports `8091`/`8096`) before merging to `master`.
-- **Mandatory Living Documentation Updates:** EVERY TIME code is promoted or merged into `master`, agents MUST automatically update the architecture documentation in `docs/` (`ARCHITECTURE_OVERVIEW.md`, `DATABASE_AND_DATA_MODELS.md`, `ETL_PIPELINES_AND_INGESTION.md`, `APIS_AND_GATEWAYS.md`, `FRONTEND_AND_BOT_APPLICATIONS.md`, `INFRASTRUCTURE_AND_CICD.md`).
+- **Production-Only Architecture Sync (HARD RULE):** The `quant-architecture` repository is **ONLY updated and pushed when code is promoted to Production (`master` / `prod`)**. During everyday sandbox development and testing on `develop`/`develop2`, `quant-architecture` MUST remain frozen.
+- **Mandatory Living Documentation Updates:** EVERY TIME code is promoted or merged into `master`, agents MUST automatically update the architecture documentation in `docs/` (`ARCHITECTURE_OVERVIEW.md`, `DATABASE_AND_DATA_MODELS.md`, `ETL_PIPELINES_AND_INGESTION.md`, `APIS_AND_GATEWAYS.md`, `FRONTEND_AND_BOT_APPLICATIONS.md`, `INFRASTRUCTURE_AND_CICD.md`), update `implementation_plans/00_ACTIVE_BACKLOG.md`, and push `quant-architecture` to `origin master`.
 - **No Outdated Docs:** Architecture documentation must always reflect the exact code state running in production. Outdated documentation is treated as a critical defect.
 
 ---
