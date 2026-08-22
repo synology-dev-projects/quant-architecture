@@ -17,6 +17,9 @@
   - *Database / Pipelines / ETL:* MUST view `.agents/rules/oracle-concurrency.md` and `.agents/rules/pipeline-standards.md`.
   - *Frontend / Mobile PWA:* MUST view `docs/FRONTEND_AND_BOT_APPLICATIONS.md`.
 - **Mandatory Local End-to-End Test Gate (Hard Rule):** NEVER commit or push code to git without first executing end-to-end local testing with real requests and automated test suites (`pytest`). For ANY new feature, bug fix, or hotfix, local in-situ verification MUST pass 100% before requesting approval or running `git commit`.
+- **Mandatory Local Docker Container & Volume Verification (Rule 2):** For any changes to dependencies, environment variables, services, or configurations, you MUST test the application inside local Docker containers (`docker compose up --build`) before pushing to staging. This guarantees that file volume mounts (`common_config`, `common_lib`), dependencies (`requirements.txt`), and container networking function identically inside Docker as they do in the host interpreter.
+- **Strict Full Dev Cycle for All Fixes (Rule 1):** Every bug fix, hotfix, and refactor MUST follow the identical standard engineering lifecycle: `Local Test (Host + Docker)` ➔ `develop2 (Staging Deploy & Hardware Verification)` ➔ `master (Production Promotion)`. Never fast-track or bypass the staging environment for "quick" fixes.
+- **Zero Direct Local Push to Master (Rule 3 - Hard Invariant):** Under NO circumstances is direct local pushing to `master` allowed. The `master` branch (Production) must ONLY be updated via merge from `develop`/`develop2` after successful staging deployment and hardware verification.
 - **Self-Verification Gate:** Always execute `./verify.sh` or `pytest` locally inside the workspace before presenting code. Never declare a task complete without passing tests.
 
 ---

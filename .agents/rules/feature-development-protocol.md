@@ -47,12 +47,13 @@ graph TD
 - **Configuration Hygiene:** Read all parameters from `MainConfig` or environment variables; never hardcode credentials, ports, or URLs.
 - **Failure Resilience:** Wrap network operations in exponential backoff retries and explicit timeouts.
 
-### Phase 4: Local In-Situ Verification Gate
+### Phase 4: Local In-Situ Verification Gate (Host + Docker Container)
 - Write comprehensive unit tests in `tests/` covering both happy paths and negative edge cases.
 - Execute local `./verify.sh` or `pytest` in the workspace to confirm:
   - Static typechecks pass with 0 errors.
   - All unit tests pass with `exit code 0` in <5 seconds.
   - Zero database mutations occur against production tables.
+- **Mandatory Local Docker Container Verification:** For any changes involving dependencies (`requirements.txt`), services, environment variables, or file system volume mounts (`common_config`, `common_lib`), agents MUST build and run the local Docker Compose stack (`docker compose up --build -d`) to verify that the container mounts, dependencies, and network connections function identically in Docker before pushing to staging.
 
 ### Phase 5a: "No-Mistakes" Quality Review Gate
 - Run the `no-mistakes-reviewer` subagent on the git diff to audit:
@@ -71,11 +72,9 @@ graph TD
   5. **Anti-Bloat (Zero-Bloat Mandate):** Eliminate redundant hops, resume-driven abstractions, and unnecessary complexity.
 - Reviewer outputs the **Enterprise Scorecard**, **Mandatory Engineering Fixes**, and **Target Lean Architecture**.
 
-### Phase 6: PR Summary, Staging Validation & Living Documentation
-- Produce a clean, concise PR summary document or walkthrough detailing:
-  - What was built and why.
-  - Verification results and test output.
-  - Key decisions made.
-- Deploy to staging develop container for human-in-the-loop validation.
+### Phase 6: Staging Deploy, Hardware Validation & Production Promotion
+- **Strict Full Dev Cycle for All Fixes (Rule 1):** Every bug fix, hotfix, and refactor MUST follow the full lifecycle: `Local Test (Host + Docker)` ➔ `develop2 (Staging Deploy & Hardware Live Verification)` ➔ `master (Production Promotion)`. Never fast-track or push fixes directly to `master`.
+- **Zero Direct Local Push to Master (Rule 3 - Hard Invariant):** Under NO circumstances is direct local pushing to `master` allowed. `master` can ONLY be updated via merge from `develop`/`develop2` after staging verification.
+- **Produce Walkthrough Document:** Detail changes, hardware verification results, and key decisions made.
 - **Mandatory Local Server Teardown:** Whenever local testing completes and changes are pushed to `develop`/`develop2` or `master`, agents MUST automatically terminate all local background testing processes (`uvicorn`, `http.server`, Chrome instances) to release local ports (`3000`, `8000`) and conserve PC memory.
 - **Mandatory Living Documentation Sync (Production-Only Hard Rule):** The `quant-architecture` repository is **ONLY updated and pushed when code is promoted to Production (`master` / `prod`)**. During staging/develop testing, `quant-architecture` remains frozen. Upon promotion/merging to `master`, agents MUST automatically update all corresponding design and architecture documents in `docs/` (`ARCHITECTURE_OVERVIEW.md`, `DATABASE_AND_DATA_MODELS.md`, `ETL_PIPELINES_AND_INGESTION.md`, `APIS_AND_GATEWAYS.md`, `FRONTEND_AND_BOT_APPLICATIONS.md`, `INFRASTRUCTURE_AND_CICD.md`), update `implementation_plans/00_ACTIVE_BACKLOG.md`, and commit/push `quant-architecture` to `origin master`. Outdated architecture documentation is treated as a critical system defect.
