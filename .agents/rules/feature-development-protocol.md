@@ -41,7 +41,8 @@ graph TD
   4. `quant-pwa` / `discord-quant-bot` (Clients & UI)
 - Isolate execution to the active feature branch on `develop2` (or dedicated worktree).
 
-### Phase 3: Implementation & Anti-Bloat (Strict YAGNI)
+### Phase 3: Automatic Subagent Delegation & Implementation (Strict YAGNI)
+- **Automatic Subagent Delegation:** As soon as Phase 1 is approved, the parent planner agent MUST automatically invoke specialized Subagents (`backend_agent`, `frontend_agent`) to execute implementation tasks concurrently rather than writing code in the planner thread.
 - **Smallest Viable Diff:** Implement ONLY the capabilities approved in Phase 1.
 - **Strict Typing:** All data models must use Pydantic models (Python) or explicit interfaces (TypeScript).
 - **Configuration Hygiene:** Read all parameters from `MainConfig` or environment variables; never hardcode credentials, ports, or URLs.
