@@ -60,6 +60,7 @@
 | Role | Name | Trigger / Purpose |
 | :--- | :--- | :--- |
 | **Orchestrator** | `orchestrator` | **Primary Mandatory Entrypoint.** Enforces 6-Phase Lifecycle, spawns/kills/stops agents, and coordinates dual audits. |
+| **Incident & Triage Fixer** | `triage_and_fix_agent` | **CI/CD & Bug Remediation.** Automated 4-tier triage, local Docker repro, direct `develop2` fix, SSH host restart, 3-attempt circuit breaker. |
 | **API / Engine Engineer** | `backend_agent` | FastAPI endpoints, in-process calculation engine, circuit breakers, Oracle queries, and SSE streaming. |
 | **UI / Frontend Engineer** | `frontend_agent` | Mobile PWA, vanilla JavaScript, Canvas options charts, telemetry HUD, and Bloomberg-grade CSS. |
 | **Data / Scraper Engineer** | `pipeline_agent` | TradingEdge scrapers, ETL parsing, incremental watermarking, and dynamic UUID staging loaders. |

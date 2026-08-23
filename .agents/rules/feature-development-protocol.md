@@ -81,3 +81,63 @@ graph TD
 - **Produce Walkthrough Document:** Detail changes, hardware verification results, and key decisions made.
 - **Mandatory Local Server Teardown:** Whenever local testing completes and changes are pushed to `develop`/`develop2` or `master`, agents MUST automatically terminate all local background testing processes (`uvicorn`, `http.server`, Chrome instances) to release local ports (`3000`, `8000`) and conserve PC memory.
 - **Mandatory Living Documentation Sync (Production-Only Hard Rule):** The `quant-architecture` repository is **ONLY updated and pushed when code is promoted to Production (`master` / `prod`)**. During staging/develop testing, `quant-architecture` remains frozen. Upon promotion/merging to `master`, agents MUST automatically update all corresponding design and architecture documents in `docs/` (`ARCHITECTURE_OVERVIEW.md`, `DATABASE_AND_DATA_MODELS.md`, `ETL_PIPELINES_AND_INGESTION.md`, `APIS_AND_GATEWAYS.md`, `FRONTEND_AND_BOT_APPLICATIONS.md`, `INFRASTRUCTURE_AND_CICD.md`), update `implementation_plans/00_ACTIVE_BACKLOG.md`, and commit/push `quant-architecture` to `origin master`. Outdated architecture documentation is treated as a critical system defect.
+
+---
+
+## 3. 🚨 CI/CD Staging Failure & Bug Remediation Protocol
+
+When a staging deployment to `develop2` fails during GitHub Actions execution or an integration bug is detected:
+
+```mermaid
+flowchart TD
+    Push[Push to develop2] --> CI[GitHub Actions Runner]
+    CI -->|Exit Code != 0: FAILED| Halt[🛑 Fail-Stop & Dispatch triage_and_fix_agent]
+    Halt --> Triage[📊 Automated 4-Tier Failure Triage]
+    
+    subgraph RCA [Failure Classification]
+        Triage --> T1[Type A: Docker / Build / Packaging]
+        Triage --> T2[Type B: Secrets / Env Var Drift]
+        Triage --> T3[Type C: Synology NAS Host / Daemon]
+        Triage --> T4[Type D: Pre-Deploy Test Regression]
+    end
+    
+    T1 --> LocalDocker[Mandatory Local Docker Container Reproduction]
+    T2 --> LocalDocker
+    T4 --> LocalDocker
+    
+    T3 --> SSHRestart[Attempt SSH Host Restart / Container Prune]
+    SSHRestart --> ReDeploy[Re-Trigger CI/CD on develop2]
+    
+    LocalDocker --> Patch[Smallest Viable Diff & Verify]
+    Patch --> Commit[Commit to develop2: fix conventional tag]
+    Commit --> ReDeploy
+    
+    ReDeploy --> CircuitBreaker{Attempts < 3?}
+    CircuitBreaker -->|Yes| CheckResult[Monitor CI/CD]
+    CircuitBreaker -->|No: Exceeded 3| Escalate[🛑 Fail-Stop & Escalate Structured RCA]
+```
+
+### Step 1: Dispatch `triage_and_fix_agent` & Ingest Logs
+- When `gh run watch` reports `failure` or `cancelled`:
+  - **HARD STOP:** Never attempt to bypass staging or promote to `master`.
+  - The Orchestrator automatically dispatches `triage_and_fix_agent` with full log traces from `gh run view <run_id> --log-failed`.
+
+### Step 2: Automated Failure Classification
+Classify the error into one of 4 archetypes:
+1. **Type A (Docker / Build Failure):** Missing Linux system package, Dockerfile instruction error, wheel build failure in `requirements.txt`.
+2. **Type B (Config & Secrets Drift):** Missing environment variable in `.env.template` or GitHub Actions secret mapping.
+3. **Type C (Synology NAS Host Collision / Infrastructure):** Port 8096 in use, container name collision, Docker daemon storage exhaustion, or SSH drop.
+4. **Type D (Pre-Deploy Test Regression):** Automated test failure executing inside the GitHub Actions runner.
+
+### Step 3: Local Docker Reproduction (Mandatory Gate)
+- For Type A, B, and D errors, `triage_and_fix_agent` MUST reproduce and verify the fix locally inside Docker (`docker compose up --build -d`) before pushing. Speculative untested pushes are strictly prohibited.
+
+### Step 4: Infrastructure Self-Healing (SSH Restart)
+- For Type C (Host / Infrastructure) errors on the Synology NAS, `triage_and_fix_agent` attempts an SSH restart/cleanup of hanging Docker containers on the NAS host before escalating.
+
+### Step 5: Direct `develop2` Commit & Master Regression Gate
+- Commit the fix directly to `develop2` using conventional tags: `fix(cicd): ...`, `fix(gateway): ...`, `fix(docker): ...`.
+- **Master Regression Gate (Rule 1):** If a bug occurs while verifying the `master` (Production) branch, the fix MUST STILL go through `develop2`, pass staging verification on port `8096`, and be promoted to `master` via PR. Never patch `master` directly.
+
+### Step 6: 3-Attempt Circuit Breaker
+- Up to 3 autonomous fix-and-deploy attempts are permitted per incident. If the 3rd attempt fails on the same root cause, the agent halts immediately and presents a structured RCA report to the human Engineering Director.
