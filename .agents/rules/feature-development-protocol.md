@@ -23,7 +23,8 @@ graph TD
 
 ## 2. Detailed Phase Specifications
 
-### Phase 1: Architecture RFC & Implementation Plan
+### Phase 1: Orchestrator Ingestion, Architecture RFC & Plan
+- **Mandatory Orchestrator Entrypoint:** Every new feature, integration, or refactor MUST begin by activating the `orchestrator` agent. The Orchestrator manages the active backlog (`00_ACTIVE_BACKLOG.md`), creates the implementation plan, coordinates worker subagents, and enforces all testing gates.
 - Never write source code from an initial prompt. Always create `implementation_plans/<feature_name>.md`.
 - **Mandatory Plan Structure:**
   1. **Architecture & Design Decisions:** Explain technical trade-offs, schemas, and API contracts.
@@ -41,8 +42,9 @@ graph TD
   4. `quant-pwa` / `discord-quant-bot` (Clients & UI)
 - Isolate execution to the active feature branch on `develop2` (or dedicated worktree).
 
-### Phase 3: Automatic Subagent Delegation & Implementation (Strict YAGNI)
-- **Automatic Subagent Delegation:** As soon as Phase 1 is approved, the parent planner agent MUST automatically invoke specialized Subagents (`backend_agent`, `frontend_agent`) to execute implementation tasks concurrently rather than writing code in the planner thread.
+### Phase 3: Orchestrator Crew Dispatch & Parallel Implementation (Strict YAGNI)
+- **Automatic Subagent Delegation:** As soon as Phase 1 is approved, the `orchestrator` MUST automatically dispatch specialized worker Subagents (`backend_agent`, `frontend_agent`, `pipeline_agent`) concurrently.
+- **Supervision & Termination:** The `orchestrator` monitors running agents, sends corrective guidance, and can stop/kill agents (`manage_subagents`) if regressions or architectural violations occur.
 - **Smallest Viable Diff:** Implement ONLY the capabilities approved in Phase 1.
 - **Strict Typing:** All data models must use Pydantic models (Python) or explicit interfaces (TypeScript).
 - **Configuration Hygiene:** Read all parameters from `MainConfig` or environment variables; never hardcode credentials, ports, or URLs.

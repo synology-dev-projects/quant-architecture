@@ -59,11 +59,12 @@
 
 | Role | Name | Trigger / Purpose |
 | :--- | :--- | :--- |
-| **Orchestrator** | `captain` | Cross-repo planning, dependency sequencing, and task dispatching. |
-| **Data Engineer** | `pipeline-crew` | Scrapers, ETL transformations, rate limits, and Oracle upsert loaders. |
-| **API Engineer** | `backend-crew` | FastAPI endpoints, SQLAlchemy pooling, DTE math, and SSE streaming. |
-| **Reviewer (Quality)** | `no-mistakes` | Adversarial pre-commit audit (Security, Concurrency, Precision, Tests). |
-| **Reviewer (Architecture)** | `architecture-review-agent` | Enterprise systems evaluation for 1,000 DAU scale (Scalability, Cost, Zero-Bloat). |
+| **Orchestrator** | `orchestrator` | **Primary Mandatory Entrypoint.** Enforces 6-Phase Lifecycle, spawns/kills/stops agents, and coordinates dual audits. |
+| **API / Engine Engineer** | `backend_agent` | FastAPI endpoints, in-process calculation engine, circuit breakers, Oracle queries, and SSE streaming. |
+| **UI / Frontend Engineer** | `frontend_agent` | Mobile PWA, vanilla JavaScript, Canvas options charts, telemetry HUD, and Bloomberg-grade CSS. |
+| **Data / Scraper Engineer** | `pipeline_agent` | TradingEdge scrapers, ETL parsing, incremental watermarking, and dynamic UUID staging loaders. |
+| **Reviewer (Quality)** | `research` | "No-Mistakes Quality Reviewer" auditing Security, Concurrency, Math Precision, and Test Coverage. |
+| **Reviewer (Architecture)** | `architecture_review_agent` | "Enterprise Principal Systems Architect" auditing 1,000 DAU scale, Latency, Maintainability, and Zero-Bloat. |
 
 ---
 
