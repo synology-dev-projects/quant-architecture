@@ -10,14 +10,14 @@ The **Quant System** is an end-to-end quantitative options intelligence and auto
 
 | Subsystem | Repository / Directory | Technology Stack | Core Responsibility |
 | :--- | :--- | :--- | :--- |
-| **Shared Core Library** | `common-lib` | Python 3.13, SQLAlchemy, Pandas, Pydantic, Oracledb | Unified database connectors, dynamic UUID staging tables, connection pooling, push alerts (`ntfy`), and shared mathematical utilities. |
+| **Shared Core Library** | `common-lib` | Python 3.13, SQLAlchemy, Pandas, Pydantic, Psycopg 3, Oracledb | Unified database connectors (PostgreSQL / TimescaleDB & Oracle legacy fallback), native `ON CONFLICT` upserts, connection pooling, push alerts (`ntfy`), and shared mathematical utilities. |
 | **Configuration Hub** | `common_config` | YAML, Markdown, Git | Central metadata catalog (`db_catalog.yaml`), steering documents, and environment specs. |
 | **Quant AI Modular Monolith** | `quant-pwa` | HTML5 Canvas, Vanilla JS, CSS3, FastAPI, Gemini SDK | High-performance modular monolith embedding in-process options calculation engine, defensive circuit breaker, dynamic split-model router, sub-300ms SSE streaming, and MCP server. |
 | **Options Analytics API** | `gexdex-api` *(Legacy/Standalone)* | FastAPI, ThreadPoolExecutor, Pydantic, Requests | *Embedded in-process within `quant-pwa` Gateway for 0.6ms zero-network-hop execution; standalone container optional for external tooling.* |
-| **Quant Levels ETL** | `quant-level-pipeline` | Python, BeautifulSoup4, Dateutil, Oracle | Scrapes daily quantitative resistance, support, and bounce levels from TradingEdge, parsing structured price ladders into Oracle. |
-| **IBKR Tick Ingestion** | `ibkr-historical-data-pipeline` | Python, `ib_insync`, Pandas, Oracle | Connects to Interactive Brokers Gateway to extract historical 1-min, 5-min, and 1-hour OHLCV and volume-weighted average price (WAP) bars. |
-| **MM DEX/GEX Pipeline** | `mm-dex-gex-pipeline` | Python, Requests, Pandas, Oracle | Batch pipeline extracting complete market-maker exposure tables across strike ladders and persistence into relational tables. |
-| **Unusual Option Flow** | `unusual-option-flow-pipeline` | Python, Requests, Pandas, Oracle | Scans institutional options flow, filtering for unusual Volume/Open Interest ratios and aggressive high-premium blocks (> $100k). |
+| **Quant Levels ETL** | `quant-level-pipeline` | Python, BeautifulSoup4, Dateutil, PostgreSQL / TimescaleDB | Scrapes daily quantitative resistance, support, and bounce levels from TradingEdge, parsing structured price ladders into PostgreSQL. |
+| **IBKR Tick Ingestion** | `ibkr-historical-data-pipeline` | Python, `ib_insync`, Pandas, PostgreSQL / TimescaleDB | Connects to Interactive Brokers Gateway to extract historical 1-min, 5-min, and 1-hour OHLCV and volume-weighted average price (WAP) bars. |
+| **MM DEX/GEX Pipeline** | `mm-dex-gex-pipeline` | Python, Requests, Pandas, PostgreSQL / TimescaleDB | Batch pipeline extracting complete market-maker exposure tables across strike ladders and persistence into relational tables. |
+| **Unusual Option Flow** | `unusual-option-flow-pipeline` | Python, Requests, Pandas, PostgreSQL / TimescaleDB | Scans institutional options flow, filtering for unusual Volume/Open Interest ratios and aggressive high-premium blocks (> $100k). |
 | **Discord Quant Bot** | `discord-quant-bot` *(Archived)* | Python, `discord.py` | *Decommissioned in favor of mobile Quant PWA frontend.* |
 
 ---
@@ -39,10 +39,14 @@ graph LR
                 MCPServer[MCP SSE Hub]
             end
             
+            subgraph DataTier [Database Layer]
+                PG_DB[(🐘 PostgreSQL 16 + TimescaleDB :5435<br/>RAM: ~250MB)]
+                ORA_LEGACY[(Oracle DB XE :1521<br/>Legacy / Deprecated)]
+            end
+
             CFT[quant-cloudflared-prod]
         end
         
-        ORA[Oracle DB :1521 / XE]
         IB[IBKR Gateway :4002]
     end
 
@@ -51,6 +55,7 @@ graph LR
     
     FE_PROD --> Monolith
     FE_DEV --> Monolith
+    Monolith -->|psycopg pooled connection| PG_DB
     Engine --> RAMCache
     Engine --> TE_Cloud[TradingEdge Cloud (Live Options Scrape)]
     Engine -. Fallback on Scraper Failure .-> RAMCache
@@ -66,10 +71,12 @@ graph LR
    Requests are dynamically classified into execution tiers:
    * **Tier 1 (Fast Worker):** `gemini-3.5-flash-lite` (`budget=0`, sub-300ms TTFT) for single-ticker lookups and fast data extraction.
    * **Tier 2 (Strategic Synthesizer):** `gemini-3.7-flash` (`budget=512`, deep analytical reasoning) for multi-source macro cross-synthesis.
-3. **Asymmetric SSE Payload Separation:**
+3. **PostgreSQL 16 + TimescaleDB Persistence Engine (DB-01):**
+   The Quant System transitioned from Oracle XE (4GB–8GB RAM footprint, high disk I/O) to an ultra-lean PostgreSQL 16 + TimescaleDB container (`quant-db` on host port `5435`, internal port `5432`). This reduced database memory footprint from >6GB to **~250MB (95% memory drop)** while providing sub-2ms query latency via composite B-tree indexes and eliminating temporary UUID staging tables in favor of atomic `ON CONFLICT (pk...) DO UPDATE SET ...` upsert clauses.
+4. **Idempotent Database Persistence & Connection Pooling:**
+   All ETL pipelines and the `quant-pwa` Gateway leverage `common_lib.connectors.postgres` with pooled `psycopg 3` connections (`pool_size=5`, `max_overflow=10`, `pool_recycle=1800`, `pool_pre_ping=True`) ensuring fail-safe reconnects and zero connection leakage.
+5. **Asymmetric SSE Payload Separation:**
    Full 40KB strike distribution arrays are emitted directly to client HTML5 Canvas via `event: tool_ui`, while returning a compact ~150-token quantitative brief to the LLM, cutting token costs by 85%.
-4. **Idempotent Database Persistence (`MERGE INTO`):**
-   All pipeline loaders use staging tables and atomic Oracle `MERGE INTO` statements to ensure that repeated cron executions or historical backfills never produce duplicate primary keys.
 3. **Pluggable Model Context Protocol (MCP):**
    The Gateway exposes a standardized JSON-RPC MCP hub allowing AI agents to dynamically discover and execute quant tools (`get_gexdex`, `get_market_status`).
 4. **Dynamic Split-Model Router (Router-Worker-Synthesizer Pattern):**

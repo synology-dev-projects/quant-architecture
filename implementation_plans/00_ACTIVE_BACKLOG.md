@@ -34,6 +34,7 @@ LOW/MED IMPACT│  [P3] Quant Level PDF Parser   │  [P2] Prometheus Metrics
 ---
 
 ## 📦 Completed & Merged Milestones (Moved to completed_archive/)
+* ✅ **PostgreSQL 16 + TimescaleDB Migration & Oracle Deprecation (`DB-01`)** (Released August 2026)
 * ✅ **Unusual Options Flow Ingestion Pipeline & AI Agent Tool (`FLOW-01`)** (Released August 2026)
 * ✅ **Unified Modular Monolith with In-Process Defensive Circuit Breakers** (Released August 2026)
 * ✅ **Dynamic Split-Model Router & Tier Classifier** (Released August 2026)
@@ -43,5 +44,4 @@ LOW/MED IMPACT│  [P3] Quant Level PDF Parser   │  [P2] Prometheus Metrics
 * ✅ **Institutional Bloomberg-Grade UI Emoji Purge** (Released August 2026)
 * ✅ **5-Bar Hardware Latency Waterfall Diagnostic HUD** (Released August 2026)
 * ✅ **In-Memory Ring Buffer Logging System (GET /api/diagnostics/logs)** (Released August 2026)
-* ✅ **Enterprise Architecture Review Agent (1k DAU)** (Released August 2026)
 * ✅ **Enterprise Architecture Review Agent (1k DAU)** (Released August 2026)
