@@ -12,8 +12,8 @@ The **Quant System** is an end-to-end quantitative options intelligence and auto
 | :--- | :--- | :--- | :--- |
 | **Shared Core Library** | `common-lib` | Python 3.13, SQLAlchemy, Pandas, Pydantic, Oracledb | Unified database connectors, dynamic UUID staging tables, connection pooling, push alerts (`ntfy`), and shared mathematical utilities. |
 | **Configuration Hub** | `common_config` | YAML, Markdown, Git | Central metadata catalog (`db_catalog.yaml`), steering documents, and environment specs. |
-| **Options Analytics API** | `gexdex-api` | FastAPI, ThreadPoolExecutor, Pydantic, Requests | High-concurrency parallel ingestion and calculation engine for Gamma Exposure (GEX), Delta Exposure (DEX), Call/Put Walls, Zero GEX flips, and session pooling. |
-| **Quant AI Mobile PWA** | `quant-pwa` | HTML5 Canvas, Vanilla JS, CSS3, FastAPI (Gateway), Gemini SDK | Mobile-first AI chat with sub-300ms SSE streaming, pure client-side HTML5 Canvas options charts, SWR caching, and Model Context Protocol (MCP) server. |
+| **Quant AI Modular Monolith** | `quant-pwa` | HTML5 Canvas, Vanilla JS, CSS3, FastAPI, Gemini SDK | High-performance modular monolith embedding in-process options calculation engine, defensive circuit breaker, dynamic split-model router, sub-300ms SSE streaming, and MCP server. |
+| **Options Analytics API** | `gexdex-api` *(Legacy/Standalone)* | FastAPI, ThreadPoolExecutor, Pydantic, Requests | *Embedded in-process within `quant-pwa` Gateway for 0.6ms zero-network-hop execution; standalone container optional for external tooling.* |
 | **Quant Levels ETL** | `quant-level-pipeline` | Python, BeautifulSoup4, Dateutil, Oracle | Scrapes daily quantitative resistance, support, and bounce levels from TradingEdge, parsing structured price ladders into Oracle. |
 | **IBKR Tick Ingestion** | `ibkr-historical-data-pipeline` | Python, `ib_insync`, Pandas, Oracle | Connects to Interactive Brokers Gateway to extract historical 1-min, 5-min, and 1-hour OHLCV and volume-weighted average price (WAP) bars. |
 | **MM DEX/GEX Pipeline** | `mm-dex-gex-pipeline` | Python, Requests, Pandas, Oracle | Batch pipeline extracting complete market-maker exposure tables across strike ladders and persistence into relational tables. |
@@ -22,17 +22,23 @@ The **Quant System** is an end-to-end quantitative options intelligence and auto
 
 ---
 
-## 3. Network Topology & Microservices Map
+## 3. Network Topology & Unified Architecture Map
 
 ```mermaid
 graph LR
     subgraph LAN_192_168_1_68 [Synology NAS: 192.168.1.68]
         subgraph DockerBridge [Docker Network: quant-system-network]
-            GW[quant-gateway :8000]
             FE_PROD[quant-frontend-prod :8095]
             FE_DEV[quant-frontend-dev :8096]
-            API_PROD[gexdex-api-prod :8090]
-            API_DEV[gexdex-api-dev :8091]
+            
+            subgraph Monolith [quant-gateway Container :8000]
+                Router[Dynamic Split-Model Router]
+                CB[Defensive Circuit Breaker]
+                Engine[In-Process GexDexService]
+                RAMCache[Top 20 RAM SWR Pre-Cache]
+                MCPServer[MCP SSE Hub]
+            end
+            
             CFT[quant-cloudflared-prod]
         end
         
@@ -43,19 +49,26 @@ graph LR
     CFT <== Encrypted Zero-Port Tunnel ==> CFEdge[Cloudflare Edge Network]
     CFEdge <== HTTPS ==> MobileUser[📱 Mobile Phone / 5G]
     
-    FE_PROD --> GW
-    GW --> API_PROD
-    API_PROD --> ORA
-    API_PROD --> TE_Cloud[TradingEdge Cloud (Parallel Scrape)]
+    FE_PROD --> Monolith
+    FE_DEV --> Monolith
+    Engine --> RAMCache
+    Engine --> TE_Cloud[TradingEdge Cloud (Live Options Scrape)]
+    Engine -. Fallback on Scraper Failure .-> RAMCache
 ```
 
 ---
 
 ## 4. Key Architectural Patterns
 
-1. **Backend-For-Frontend (BFF) Gateway Pattern:**
-   The `quant-pwa` Gateway acts as an intelligent aggregator between mobile clients and internal NAS services. It converts 4 sequential high-latency cellular hops into sub-5ms internal Docker network hops.
-2. **Idempotent Database Persistence (`MERGE INTO`):**
+1. **Unified Modular Monolith with Defensive Circuit Breakers:**
+   The `quant-pwa` Gateway embeds options analytics in-process (`GexDexService`), reducing tool execution latency from `~15ms` network loopback to **`0.6ms` RAM lookup**. A stateful `CircuitBreaker` (`CLOSED`/`OPEN`/`HALF_OPEN`) with a 25s deadline guarantees that scraper timeouts or 3rd-party outages instantly fall back to cached closing snapshots without crashing the Gateway or dropping user chat sessions.
+2. **Dynamic Split-Model Router:**
+   Requests are dynamically classified into execution tiers:
+   * **Tier 1 (Fast Worker):** `gemini-3.5-flash-lite` (`budget=0`, sub-300ms TTFT) for single-ticker lookups and fast data extraction.
+   * **Tier 2 (Strategic Synthesizer):** `gemini-3.7-flash` (`budget=512`, deep analytical reasoning) for multi-source macro cross-synthesis.
+3. **Asymmetric SSE Payload Separation:**
+   Full 40KB strike distribution arrays are emitted directly to client HTML5 Canvas via `event: tool_ui`, while returning a compact ~150-token quantitative brief to the LLM, cutting token costs by 85%.
+4. **Idempotent Database Persistence (`MERGE INTO`):**
    All pipeline loaders use staging tables and atomic Oracle `MERGE INTO` statements to ensure that repeated cron executions or historical backfills never produce duplicate primary keys.
 3. **Pluggable Model Context Protocol (MCP):**
    The Gateway exposes a standardized JSON-RPC MCP hub allowing AI agents to dynamically discover and execute quant tools (`get_gexdex`, `get_market_status`).

@@ -1,25 +1,30 @@
-# ⚡ APIs, Gateways & MCP Protocols
-
 ## 1. Overview
 
-The Quant System API tier consists of two FastAPI services:
-1. **`gexdex-api` (Port 8090/8091):** Microservice for raw options chain calculation, dealer exposure analytics, and visual Matplotlib rendering.
-2. **`quant-pwa` Gateway (Port 8000):** Backend-For-Frontend (BFF) providing low-latency SSE chat streaming, temporal market awareness, Google GenAI tool execution, and an MCP server.
+The Quant System exposes a unified high-performance API surface via the **`quant-pwa` Modular Monolith** (Port `8095` Prod / `8096` Staging):
+1. **In-Process Options Analytics Engine (`GexDexService`):** Native calculation engine with defensive `CircuitBreaker`, SWR pre-caching, and sub-millisecond execution (`0.6ms`).
+2. **Backward-Compatible REST Endpoints:** Direct `/api/v1/gexdex/*` routes for third-party bots, mobile apps, and scripts.
+3. **Real-Time AI Chat Streaming (`/api/chat/stream`):** SSE streaming with Dynamic Split-Model Router (`gemini-3.5-flash-lite` vs `gemini-3.7-flash`), asymmetric payload splitting, and 5-bar hardware waterfall telemetry.
+4. **Model Context Protocol (MCP) Server (`/mcp/sse`):** Pluggable tool hub for Claude Desktop, Gemini SDK, and agent swarms.
 
 ---
 
-## 2. `gexdex-api` Endpoint Reference
+## 2. Options Analytics REST Endpoints (`/api/v1/gexdex/*`)
 
 ### 2.1 Health Check
-* **`GET /health`**
+* **`GET /health`** or **`GET /api/health`**
 * **Auth:** None (Public)
 * **Response:**
   ```json
   {
-    "status": "healthy",
-    "timestamp": "2026-08-22T07:10:00Z",
-    "service": "gexdex-api",
-    "version": "1.0.0"
+    "status": "ok",
+    "service": "quant-gateway",
+    "market": {
+      "status": "REGULAR_MARKET_OPEN",
+      "is_live_trading": true,
+      "description": "Regular market trading hours (9:30 AM - 4:00 PM EDT)",
+      "current_time_ny": "Monday, Aug 24, 2026 - 10:15 AM EDT",
+      "iso_timestamp": "2026-08-24T10:15:00.000000-04:00"
+    }
   }
   ```
 
