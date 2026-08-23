@@ -26,7 +26,6 @@ LOW/MED IMPACT│  [P3] Quant Level PDF Parser   │  [P2] Prometheus Metrics
 | :---: | :---: | :--- | :--- | :---: | :---: | :--- |
 | 🔴 **P1 (Top)** | PIPE-01 | ibkr-historical-data-pipeline | **IBKR Async Socket Lifecycle & Client ID Leak Prevention**<br>Wrap ib_insync sockets in strict `try...finally: ib.disconnect()` and randomized client ID fallbacks to prevent cron lockout. | **HIGH** (Reliability) | Low-Med | [p1_high_impact_resilience/P1_IBKR_ASYNC_SOCKET_LIFECYCLE.md](p1_high_impact_resilience/P1_IBKR_ASYNC_SOCKET_LIFECYCLE.md) |
 | 🔴 **P1** | AGENT-01 | quant-pwa (Gateway) | **Quant AI Agent Evaluation & Benchmarking Harness**<br>Automated test harness for evaluating agent tool accuracy, split-model routing, prompt regressions, and synthetic multi-turn stress tests. | **HIGH** (Quality) | Med | `implementation_plans/p1_agent_harness.md` |
-| 🟠 **P2** | FLOW-01 | unusual-option-flow-pipeline & quant-pwa | **Unusual Options Flow Ingestion & Agent Tool Skill**<br>Connect $100k+ block flow data to the Gateway via `get_unusual_flow()` tool and real-time smart money sentiment indicators. | **HIGH** (Alpha) | Med | `implementation_plans/p2_unusual_options_flow.md` |
 | 🟠 **P2** | PWA-01 | quant-pwa (Frontend) | **Quant Levels Terminal Tab & Oracle Price Ladders**<br>Dedicated PWA tab rendering structured key support/resistance levels, daily bounce targets, and spot distance delta from Oracle DB. | **MEDIUM** (UX/Alpha) | Low-Med | `implementation_plans/p2_quant_level_tab.md` |
 | 🟡 **P3** | TA-01 | common-lib & quant-pwa | **Technical Analysis (TA) Indicator Engine & Bar Stream**<br>Vectorized TA calculations (RSI, MACD, VWAP, EMA ribbons) over IBKR OHLCV bars with agent tool discovery and chart overlays. | **MEDIUM** (Technical) | Med | `implementation_plans/p3_ta_data_flow.md` |
 | 🟡 **P3** | OBSV-01 | gexdex-api & quant-pwa | **Centralized Log Aggregation & Prometheus Metrics Exporter**<br>Add /metrics endpoint tracking scrape durations, cache hit ratios, and structured JSON logs. | **MEDIUM** (Observability) | Med | [p2_medium_impact_observability/P2_CENTRALIZED_LOGGING_METRICS.md](p2_medium_impact_observability/P2_CENTRALIZED_LOGGING_METRICS.md) |
@@ -35,6 +34,7 @@ LOW/MED IMPACT│  [P3] Quant Level PDF Parser   │  [P2] Prometheus Metrics
 ---
 
 ## 📦 Completed & Merged Milestones (Moved to completed_archive/)
+* ✅ **Unusual Options Flow Ingestion Pipeline & AI Agent Tool (`FLOW-01`)** (Released August 2026)
 * ✅ **Unified Modular Monolith with In-Process Defensive Circuit Breakers** (Released August 2026)
 * ✅ **Dynamic Split-Model Router & Tier Classifier** (Released August 2026)
 * ✅ **Top 20 Benchmark RAM Pre-Cache Warmer** (Released August 2026)
@@ -43,4 +43,5 @@ LOW/MED IMPACT│  [P3] Quant Level PDF Parser   │  [P2] Prometheus Metrics
 * ✅ **Institutional Bloomberg-Grade UI Emoji Purge** (Released August 2026)
 * ✅ **5-Bar Hardware Latency Waterfall Diagnostic HUD** (Released August 2026)
 * ✅ **In-Memory Ring Buffer Logging System (GET /api/diagnostics/logs)** (Released August 2026)
+* ✅ **Enterprise Architecture Review Agent (1k DAU)** (Released August 2026)
 * ✅ **Enterprise Architecture Review Agent (1k DAU)** (Released August 2026)
