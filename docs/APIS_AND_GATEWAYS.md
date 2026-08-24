@@ -147,7 +147,23 @@ The Gateway exposes standard Model Context Protocol (MCP) transports for autonom
 * **SSE Transport Endpoint:** `GET /mcp/sse`
 * **Message Ingestion Endpoint:** `POST /mcp/messages?session_id=<UUID>`
 
-### Implemented MCP Tools:
+### Implemented MCP Tools & Agent Tool Registry:
 1. **`get_gexdex(ticker: str)`**: Retrieves real-time Call/Put Walls, Net Gamma, Net Delta, Gamma Flip level, and institutional dealer regime. Single-flight comma-separated batching (`META,AAPL,...`) supported.
-2. **`get_strike_distribution(ticker: str, min_strike: float, max_strike: float)`**: Returns array of discrete strike-by-strike GEX and DEX bars for custom client-side visualization.
-3. **`get_market_status()`**: Returns current Eastern Time, market session state (`REGULAR_HOURS`, `PRE_MARKET`, `AFTER_HOURS`, `WEEKEND_CLOSED`), and time to next open/close.
+2. **`get_unusual_flow(ticker: str, lookback_days: int = 30, min_premium: float = 100000.0)`**: Queries high-conviction institutional options flow, block trades, sweeps, and smart money positioning from PostgreSQL table `unusual_option_flow_te`. Invoked via prompt or `/flow <ticker>` slash command with composite index optimization (`idx_flow_sym_date_prem`) and sub-millisecond in-memory caching.
+3. **`get_strike_distribution(ticker: str, min_strike: float, max_strike: float)`**: Returns array of discrete strike-by-strike GEX and DEX bars for custom client-side visualization.
+4. **`get_market_status()`**: Returns current Eastern Time, market session state (`REGULAR_HOURS`, `PRE_MARKET`, `AFTER_HOURS`, `WEEKEND_CLOSED`), and time to next open/close.
+5. **`macro_schedule()`**: Queries key upcoming macroeconomic releases (CPI, FOMC rate decisions, PPI, Non-Farm Payrolls, GDP) and implied market volatility catalyst dates.
+
+---
+
+## 5. Slash Commands & Quick Skill Invocations
+
+The gateway agent runtime recognizes streamlined institutional slash commands:
+
+| Slash Command | Mapped Tool | Default Parameters | Sample Prompt | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **`/gex <ticker>`** | `get_gexdex` | `strike_range=25, max_dte=50` | `/gex SPY` | Fetches Gamma/Delta Exposure, Call/Put Walls, and Zero Gamma Flip points. |
+| **`/flow <ticker>`** | `get_unusual_flow` | `lookback_days=30, min_premium=100000.0` | `/flow SPY` | Fetches institutional sweeps, block orders, and smart-money directional positioning. |
+| **`/strikes <ticker>`** | `get_strike_distribution` | `strike_range=25` | `/strikes NVDA` | Fetches discrete strike distribution matrix for interactive canvas rendering. |
+| **`/market`** | `get_market_status` | `None` | `/market` | Returns real-time NY session status clock and time to next market event. |
+| **`/macro`** | `macro_schedule` | `None` | `/macro` | Queries economic calendar releases and central bank rate decision schedules. |

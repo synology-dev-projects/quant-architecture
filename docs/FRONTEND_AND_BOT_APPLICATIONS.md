@@ -66,6 +66,21 @@ quant-pwa/
 
 ---
 
+### 1.6 Interactive Prompt Bar & Institutional Skill Chips (`prompt_input.js`)
+* **Quick Skill Chips:** Mounts a horizontally scrollable chip bar above the prompt textarea containing pre-configured institutional commands:
+  - `/gex SPY`: Real-time institutional GEX/DEX calculation and wall levels.
+  - `/flow SPY`: Real-time unusual options flow, sweeps, blocks, and smart money positioning.
+  - `/strikes NVDA`: Multi-expiration discrete strike distribution matrix.
+  - `/market`: Real-time US Equities market session status clock.
+  - `/macro`: Key macroeconomic catalyst schedule (CPI, FOMC, Rate decisions).
+* **Click-to-Insert Focus Mechanics:** Clicking or tapping any chip instantly populates the textarea with the template and sets focus with cursor positioning at the end of text.
+* **Hover & Long-Press Tooltip Card:**
+  - Desktop: Hovering over a chip renders a floating metadata card detailing parameters (`ticker`, `lookback_days`, `min_premium`), required tags, and query examples.
+  - Mobile Touch: Long-press (>380ms) triggers haptic feedback (25ms vibration) and displays the tooltip card.
+* **Dynamic MCP Tool Synchronization:** Automatically queries `/mcp/messages` (`tools/list`) on startup to discover and bind newly registered agent tools dynamically, falling back safely to offline defaults.
+
+---
+
 ## 2. Discord Quant Bot (`discord-quant-bot`)
 
 ### 2.1 Architecture
