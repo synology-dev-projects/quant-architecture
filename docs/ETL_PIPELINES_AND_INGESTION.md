@@ -61,12 +61,33 @@ graph LR
 ---
 
 ### 2.4 `unusual-option-flow-pipeline`
-* **Source:** Institutional option tape feed.
-* **Filtering & Quality Rules:**
-  1. $\text{Total Dollar Premium} \ge \$100,000$.
-  2. $\text{Volume / Open Interest Ratio} \ge 1.2$ (detecting aggressive new position opening vs closing existing contracts).
-  3. Order type classification: Multi-exchange sweeps, block crossings, or split orders.
-* **Target Table:** `UNUSUAL_OPTION_FLOW_TE`
+* **Source:** TradingEdge Institutional Option Flow Gate (`https://flow.tradingedge.club`).
+* **Core Architecture:**
+  - **Dynamic Site-Wide Ticker Discovery (`extract.py`):** Automatically discovers active universe tickers by parsing the landing page DOM and drop-down menu selectors, eliminating hardcoded symbol lists and capturing new tickers immediately upon publication.
+  - **Automated Flow Gate Session Lifecycle:** Performs automated form-based login authentication against `https://flow.tradingedge.club/Login.aspx`, persisting session cookies with defensive retry handling.
+  - **Deterministic ID Generation (`transform.py`):** Computes unique 32-character SHA-256 hashes (`flow_id`) across `(trade_date, symbol, order_type, strike_price, expiration_date, premium)` ensuring perfect idempotency during incremental upserts.
+  - **Normalization & Sentiment Scoring:** Normalizes strike prices, parses OTM/ITM percentages, flags unusual volume-to-open-interest spikes (`is_unusual_oi`), and captures directional net score indicators.
+
+#### Executable Pipelines & Standalone Scripts (`src/scripts/`):
+1. **`daily_incremental.py` (Production Cron Ingestion):**
+   - **Watermark Discovery:** Dynamically retrieves the latest recorded `trade_date` from PostgreSQL (`unusual_option_flow_te`), defaulting to a 30-day lookback if the table is empty.
+   - **Targeted Incremental Ingestion:** Discovers all site-wide tickers and scrapes only records beyond the database watermark cutoff date.
+   - **Zero-Drift Upserts:** Executes atomic PostgreSQL `ON CONFLICT (flow_id) DO UPDATE` writes.
+   - **Alerting:** Dispatches NTFY priority 5 alerts on fatal exceptions while completing cleanly (`exit code 0`) when 0 new records are detected on market holidays.
+
+2. **`manual_historical.py` (Deep Historical Backfill):**
+   - **CLI Parameterization:** Supports `--symbols` (e.g. `NVDA,SPY,AAPL` or all site tickers), `--days` (default 730 days / 2 years), and `--mode` (`upsert`, `overwrite`, `ignore`).
+   - **Multi-Year Extraction:** Pages through deep historical flow archives with high-efficiency batch inserts.
+
+3. **`verify_vertical.py` (In-Situ Vertical Slice Tester):**
+   - **5-Phase Verification Harness:** Executes an end-to-end dry-run validation against live production or fallback fixtures:
+     1. `[1/5] Extract:` Authenticates and fetches raw flow payloads.
+     2. `[2/5] Transform:` Verifies field types, OTM regex calculations, and SHA-256 hash generation.
+     3. `[3/5] Load:` Tests PostgreSQL connection, table creation, and idempotency (0 duplicates on re-insertion).
+     4. `[4/5] Read:` Executes single-flight multi-symbol query and formats summary via `flow_tool.py`.
+     5. `[5/5] Resilience:` Simulates empty inputs, malformed records, non-existent symbols, and database timeouts to ensure zero cascading failures.
+
+* **Target Table:** `unusual_option_flow_te` on PostgreSQL 16 (Port 5435).
 
 ---
 
@@ -74,3 +95,4 @@ graph LR
 
 1. **Failure Notification (`ntfy.py`):** Fatal exceptions trigger HTTP POST push notifications with priority 5 to `https://richntfynotifier.synology.me/alerts`.
 2. **Weekend & Holiday Invariance:** When scrapers execute on non-trading days and detect 0 new records, they log an informational event and terminate with `exit code 0` to prevent false positive CI/CD alerts.
+3. **In-Situ Vertical Testing:** All pipeline updates require `verify_vertical.py` execution prior to merge, enforcing 100% test coverage across live extraction, transformation, database upsert, and read paths.

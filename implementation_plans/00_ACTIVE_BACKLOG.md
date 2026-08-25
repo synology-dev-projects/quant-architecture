@@ -34,6 +34,7 @@ LOW/MED IMPACT│  [P3] Quant Level PDF Parser   │  [P2] Prometheus Metrics
 ---
 
 ## 📦 Completed & Merged Milestones (Moved to completed_archive/)
+* ✅ **Standalone Incremental & Deep Historical Options Flow Scripts, Dynamic Site Discovery, and In-Situ Vertical Tester (`FLOW-02`)** (Released August 2026)
 * ✅ **PostgreSQL 16 + TimescaleDB Migration & Oracle Deprecation (`DB-01`)** (Released August 2026)
 * ✅ **Unusual Options Flow Ingestion Pipeline & AI Agent Tool (`FLOW-01`)** (Released August 2026)
 * ✅ **Unified Modular Monolith with In-Process Defensive Circuit Breakers** (Released August 2026)
@@ -45,3 +46,4 @@ LOW/MED IMPACT│  [P3] Quant Level PDF Parser   │  [P2] Prometheus Metrics
 * ✅ **5-Bar Hardware Latency Waterfall Diagnostic HUD** (Released August 2026)
 * ✅ **In-Memory Ring Buffer Logging System (GET /api/diagnostics/logs)** (Released August 2026)
 * ✅ **Enterprise Architecture Review Agent (1k DAU)** (Released August 2026)
+
