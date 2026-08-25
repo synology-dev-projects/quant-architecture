@@ -149,10 +149,11 @@ The Gateway exposes standard Model Context Protocol (MCP) transports for autonom
 
 ### Implemented MCP Tools & Agent Tool Registry:
 1. **`get_gexdex(ticker: str)`**: Retrieves real-time Call/Put Walls, Net Gamma, Net Delta, Gamma Flip level, and institutional dealer regime. Single-flight comma-separated batching (`META,AAPL,...`) supported.
-2. **`get_unusual_flow(ticker: Optional[str] = "SPY", trade_date: Optional[str] = None, lookback_days: int = 30, min_premium: float = 0.0)`**: Queries high-conviction institutional options flow, block trades, sweeps, and smart money positioning from PostgreSQL table `unusual_option_flow_te`. Supports **Smart /flow Overload**:
-   - **Mode A (Single-Day Market-Wide Macro Flow):** Activated when passing a trade date (e.g. `2026-08-21`, `yesterday`, `today`, `latest`, `MARKET`) as `trade_date` or directly in `ticker`. Queries all institutional flow across the entire tape on that session, aggregating top bullish/bearish tickers by call/put dollar volume, market directional bias, and largest whale block/sweep prints.
-   - **Mode B (Single/Multi-Ticker Multi-Week Flow):** Activated when passing equity/index symbol(s) (e.g. `NVDA`, `SPY,QQQ`). Queries institutional orders over the trailing `lookback_days` (default: 30), computing cumulative call/put premium distribution, flow sentiment score, and top high-conviction prints.
-   - **Mode C (Specific Ticker Single-Day Flow):** Combines `ticker` and `trade_date` (e.g. `ticker="NVDA", trade_date="2026-08-21"`).
+2. **`get_unusual_flow(date: Optional[str] = None)`**: Queries institutional options flow prints, block trades, and sweeps from PostgreSQL table `unusual_option_flow_te`. Returns 100% of prints formatted as a pure Bloomberg Terminal Markdown Table with **zero unprompted conversational prose**.
+   - **Default Invocation (`/flow`):** When `date` is omitted, automatically resolves `MAX(trade_date)` from the database to present the entire latest trading session ledger.
+   - **Date Range Overload (`/flow <START_DATE> to <END_DATE>`):** Queries multi-day date spans (e.g. `/flow 2026-08-17 to 2026-08-21`) and renders the aggregated institutional ledger.
+   - **Specific Date Overload (`/flow <YYYY-MM-DD>`):** Queries a single historical session.
+   - **Fast LLM Routing:** Dispatched through Tier 1 `gemini-3.5-flash-lite` with `thinking_budget=0` for ultra-fast **sub-second tool decision & streaming TTFT (<1.0s)**.
 3. **`get_strike_distribution(ticker: str, min_strike: float, max_strike: float)`**: Returns array of discrete strike-by-strike GEX and DEX bars for custom client-side visualization.
 4. **`get_market_status()`**: Returns current Eastern Time, market session state (`REGULAR_HOURS`, `PRE_MARKET`, `AFTER_HOURS`, `WEEKEND_CLOSED`), and time to next open/close.
 5. **`macro_schedule()`**: Queries key upcoming macroeconomic releases (CPI, FOMC rate decisions, PPI, Non-Farm Payrolls, GDP) and implied market volatility catalyst dates.
@@ -166,7 +167,8 @@ The gateway agent runtime recognizes streamlined institutional slash commands:
 | Slash Command | Mapped Tool | Default Parameters | Sample Prompts | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | **`/gex <ticker>`** | `get_gexdex` | `strike_range=25, max_dte=50` | `/gex SPY`<br>`/gex NVDA,AAPL` | Fetches Gamma/Delta Exposure, Call/Put Walls, and Zero Gamma Flip points. |
-| **`/flow <ticker\|date\|market>`** | `get_unusual_flow` | `lookback_days=30, min_premium=0.0` | `/flow SPY`<br>`/flow 2026-08-21`<br>`/flow NVDA`<br>`/flow market` | **Smart Overload:** Single-day market-wide macro flow breakdown OR single-ticker multi-week flow & sentiment. |
+| **`/flow [date\|range]`** | `get_unusual_flow` | `date=None` (resolves `MAX(trade_date)`) | `/flow`<br>`/flow 2026-08-21`<br>`/flow 2026-08-17 to 2026-08-21` | **Streamlined Pure Table Flow:** Emits 100% of prints as an interactive Bloomberg Terminal table with 0 conversational filler. |
 | **`/strikes <ticker>`** | `get_strike_distribution` | `strike_range=25` | `/strikes NVDA` | Fetches discrete strike distribution matrix for interactive canvas rendering. |
 | **`/market`** | `get_market_status` | `None` | `/market` | Returns real-time NY session status clock and time to next market event. |
 | **`/macro`** | `macro_schedule` | `None` | `/macro` | Queries economic calendar releases and central bank rate decision schedules. |
+

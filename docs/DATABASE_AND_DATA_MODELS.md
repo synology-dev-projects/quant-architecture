@@ -38,32 +38,43 @@ Stores filtered high-premium institutional sweeps, splits, and block trades extr
 
 #### 2.1.1 Options Flow Query Patterns:
 
-**1. Market-Wide Single-Day Macro Query (`/flow <date>` / `/flow market`):**
+**1. Latest Trading Session Auto-Resolution (`/flow`):**
+```sql
+-- Step A: Resolve latest active market session
+SELECT MAX(trade_date) FROM unusual_option_flow_te;
+
+-- Step B: Fetch full ledger for that session
+SELECT flow_id, trade_date, symbol, order_type, strike_price,
+       strike_otm_pct, expiration_date, open_interest, is_unusual_oi,
+       premium, net_score
+FROM unusual_option_flow_te
+WHERE trade_date = :max_trade_date
+ORDER BY premium DESC;
+```
+* *Latency Profile:* **`< 1.0ms`** index scan via `idx_flow_date_prem`.
+* *Output:* Returns 100% of prints for the latest market session with complete accuracy.
+
+**2. Date Range Ledger Query (`/flow <START_DATE> to <END_DATE>`):**
+```sql
+SELECT flow_id, trade_date, symbol, order_type, strike_price,
+       strike_otm_pct, expiration_date, open_interest, is_unusual_oi,
+       premium, net_score
+FROM unusual_option_flow_te
+WHERE trade_date BETWEEN :start_date AND :end_date
+ORDER BY trade_date DESC, premium DESC;
+```
+* *Latency Profile:* **`< 3.5ms`** multi-day index range scan.
+
+**3. Single-Day Specific Session Query (`/flow <YYYY-MM-DD>`):**
 ```sql
 SELECT flow_id, trade_date, symbol, order_type, strike_price,
        strike_otm_pct, expiration_date, open_interest, is_unusual_oi,
        premium, net_score
 FROM unusual_option_flow_te
 WHERE trade_date = :target_date
-  AND premium >= :min_premium
-ORDER BY premium DESC
-LIMIT :limit;
+ORDER BY premium DESC;
 ```
-* *Latency Profile:* **`< 3.0ms`** execution on PostgreSQL 16 via index scan.
-* *Aggregation:* Evaluates cross-market tape sentiment, aggregates call vs. put premium distribution, groups top 5 bullish/bearish tickers by volume, and ranks whale sweep prints.
-
-**2. Single/Multi-Ticker Multi-Week Query (`/flow <ticker>`):**
-```sql
-SELECT flow_id, trade_date, symbol, order_type, strike_price,
-       strike_otm_pct, expiration_date, open_interest, is_unusual_oi,
-       premium, net_score
-FROM unusual_option_flow_te
-WHERE symbol = :symbol
-  AND trade_date >= :start_date
-  AND premium >= :min_premium
-ORDER BY trade_date DESC, premium DESC;
-```
-* *Latency Profile:* **`< 1.5ms`** execution via `idx_flow_sym_date_prem`.
+* *Latency Profile:* **`< 2.0ms`** execution on PostgreSQL 16 via `idx_flow_date_prem`.
 
 ---
 

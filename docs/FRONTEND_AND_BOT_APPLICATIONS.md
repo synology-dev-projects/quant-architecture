@@ -83,8 +83,16 @@ quant-pwa/
 
 ### 1.7 Authentic Bloomberg Terminal Options Flow Table UI (`message_renderer.js`)
 * **Markdown Table AST & DOM Generation (`parseMarkdownTables`):** Intercepts streaming markdown pipe tables (`| Symbol | Order Action | ... |`) prior to line-break normalization, wrapping parsed headers (`<thead>`) and rows (`<tbody>`) inside an isolated, high-performance responsive container:
-  `<div class="quant-table-wrapper"><table class="quant-table">...</table></div>`
-* **Horizontal Scroll Wrapper (`.quant-table-wrapper`):** Employs smooth momentum scrolling (`-webkit-overflow-scrolling: touch`) with high-density compact borders (`1px solid #1e293b`), dark backdrop (`#0c1017`), and customized slim scrollbars (`height: 5px`, `#334155` thumb) to ensure frictionless multi-column table navigation on mobile OLED displays without viewport overflow.
+  `<div class="quant-table-wrapper" data-total-rows="..."><div class="quant-table-scroll"><table class="quant-table">...</table></div>...</div>`
+* **Client-Side 20-Row Pagination (`initInteractiveTables`):**
+  - **Slicing & Dynamic Rendering:** Renders 20 prints per page (`pageSize = 20`) to eliminate mobile DOM layout lag and browser freeze when presenting 100+ raw prints.
+  - **Pagination Controls (`.bb-pagination`):** Renders institutional `◄ PREV` and `NEXT ►` buttons, dynamic page jump numbers (`.bb-page-num`), and print counter (`PAGE X OF Y (N PRINTS)`).
+  - **Zero-Latency In-Memory Payload:** Embedded `<script type="application/json" class="tbl-payload">` serializes all parsed table records into DOM memory, enabling instant client-side page transitions with 0 server roundtrips.
+* **Interactive Monospace Column Sorting (▲/▼):**
+  - **Tri-State Sort Cycle:** Clicking any column header toggles between `None -> Ascending (▲) -> Descending (▼) -> Natural`.
+  - **Automatic Data Type Detection (`detectColType`):** Intelligently parses column headers and cell values into `currency` (`$15.50M`, `$500K`), `percentage` (`+8.0%`, `-2.0%`), `date` (`2027-12-17`), `numeric` (OI / Volume integers), or `string`.
+  - **Multi-Unit Currency Parsing (`parseSortValue`):** Accurately calculates numeric weights across billions (`B`), millions (`M`), and thousands (`K`) to ensure `$15.50M` ranks above `$500K` and `$88.00K`.
+* **Horizontal Scroll Wrapper (`.quant-table-scroll`):** Employs smooth momentum scrolling (`-webkit-overflow-scrolling: touch`) with high-density compact borders (`1px solid #1e293b`), dark backdrop (`#0c1017`), and customized slim scrollbars (`height: 5px`, `#334155` thumb) to ensure frictionless multi-column table navigation on mobile OLED displays without viewport overflow.
 * **Binary Action Indicator Badges:** Formats order actions into high-contrast institutional color pills:
   - **Bullish Actions (`.bb-action-bull`):** `BUY CALL`, `SELL PUT` rendered with dark emerald backdrop (`#064e3b`), vibrant text (`#34d399`), and border (`#059669`).
   - **Bearish Actions (`.bb-action-bear`):** `BUY PUT`, `SELL CALL` rendered with deep maroon backdrop (`#450a0a`), vibrant crimson text (`#f87171`), and border (`#b91c1c`).
