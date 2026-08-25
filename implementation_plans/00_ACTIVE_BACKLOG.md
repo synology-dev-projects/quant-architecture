@@ -34,6 +34,7 @@ LOW/MED IMPACT│  [P3] Quant Level PDF Parser   │  [P2] Prometheus Metrics
 ---
 
 ## 📦 Completed & Merged Milestones (Moved to completed_archive/)
+* ✅ **Authentic Bloomberg Terminal Options Flow Table UI with Binary Action Colors and Whale Badges (`UI-02` / `FLOW-04`)** (Released August 2026)
 * ✅ **Smart `/flow` Overload for Single-Day Market Flow & Ticker Flow (`FLOW-03`)** (Released August 2026)
 * ✅ **Standalone Incremental & Deep Historical Options Flow Scripts, Dynamic Site Discovery, and In-Situ Vertical Tester (`FLOW-02`)** (Released August 2026)
 * ✅ **PostgreSQL 16 + TimescaleDB Migration & Oracle Deprecation (`DB-01`)** (Released August 2026)

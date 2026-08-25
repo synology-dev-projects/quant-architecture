@@ -81,6 +81,20 @@ quant-pwa/
 
 ---
 
+### 1.7 Authentic Bloomberg Terminal Options Flow Table UI (`message_renderer.js`)
+* **Markdown Table AST & DOM Generation (`parseMarkdownTables`):** Intercepts streaming markdown pipe tables (`| Symbol | Order Action | ... |`) prior to line-break normalization, wrapping parsed headers (`<thead>`) and rows (`<tbody>`) inside an isolated, high-performance responsive container:
+  `<div class="quant-table-wrapper"><table class="quant-table">...</table></div>`
+* **Horizontal Scroll Wrapper (`.quant-table-wrapper`):** Employs smooth momentum scrolling (`-webkit-overflow-scrolling: touch`) with high-density compact borders (`1px solid #1e293b`), dark backdrop (`#0c1017`), and customized slim scrollbars (`height: 5px`, `#334155` thumb) to ensure frictionless multi-column table navigation on mobile OLED displays without viewport overflow.
+* **Binary Action Indicator Badges:** Formats order actions into high-contrast institutional color pills:
+  - **Bullish Actions (`.bb-action-bull`):** `BUY CALL`, `SELL PUT` rendered with dark emerald backdrop (`#064e3b`), vibrant text (`#34d399`), and border (`#059669`).
+  - **Bearish Actions (`.bb-action-bear`):** `BUY PUT`, `SELL CALL` rendered with deep maroon backdrop (`#450a0a`), vibrant crimson text (`#f87171`), and border (`#b91c1c`).
+* **Whale & Large Institutional Size Badges (`.bb-tag`):**
+  - **Whale Footprints (`.bb-tag-whale`):** Trades with total premium $\ge \$5.0\text{M}$ automatically append a gold badge (`[WHALE]`, `#451a03` bg, `#fbbf24` text, `#d97706` border).
+  - **Large Footprints (`.bb-tag-large`):** Trades with total premium $\ge \$1.0\text{M}$ and $<\$5.0\text{M}$ append an indigo badge (`[LARGE]`, `#312e81` bg, `#a5b4fc` text, `#4f46e5` border).
+* **High-Density Tabular Monospace Typography:** Uses `font-family: var(--font-mono)`, `font-variant-numeric: tabular-nums`, bold blue ticker badges (`.bb-ticker`, `#60a5fa`), gold header accents (`.th-accent`, `#fbbf24`), and color-coded OTM distance percentages (`.bb-otm-pos` in `#34d399`, `.bb-otm-neg` in `#f87171`).
+
+---
+
 ## 2. Discord Quant Bot (`discord-quant-bot`)
 
 ### 2.1 Architecture
