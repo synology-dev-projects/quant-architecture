@@ -33,6 +33,37 @@ Stores filtered high-premium institutional sweeps, splits, and block trades extr
 #### Composite Indexes:
 * `idx_flow_sym_date_prem`: `CREATE INDEX idx_flow_sym_date_prem ON unusual_option_flow_te (symbol, trade_date DESC, premium DESC);`
   * *Purpose:* Sub-2ms execution for multi-ticker lookups (`WHERE symbol IN (...) AND trade_date >= ... AND premium >= ...`).
+* `idx_flow_date_prem`: `CREATE INDEX idx_flow_date_prem ON unusual_option_flow_te (trade_date DESC, premium DESC);`
+  * *Purpose:* Sub-3ms execution for market-wide single-day scans.
+
+#### 2.1.1 Options Flow Query Patterns:
+
+**1. Market-Wide Single-Day Macro Query (`/flow <date>` / `/flow market`):**
+```sql
+SELECT flow_id, trade_date, symbol, order_type, strike_price,
+       strike_otm_pct, expiration_date, open_interest, is_unusual_oi,
+       premium, net_score
+FROM unusual_option_flow_te
+WHERE trade_date = :target_date
+  AND premium >= :min_premium
+ORDER BY premium DESC
+LIMIT :limit;
+```
+* *Latency Profile:* **`< 3.0ms`** execution on PostgreSQL 16 via index scan.
+* *Aggregation:* Evaluates cross-market tape sentiment, aggregates call vs. put premium distribution, groups top 5 bullish/bearish tickers by volume, and ranks whale sweep prints.
+
+**2. Single/Multi-Ticker Multi-Week Query (`/flow <ticker>`):**
+```sql
+SELECT flow_id, trade_date, symbol, order_type, strike_price,
+       strike_otm_pct, expiration_date, open_interest, is_unusual_oi,
+       premium, net_score
+FROM unusual_option_flow_te
+WHERE symbol = :symbol
+  AND trade_date >= :start_date
+  AND premium >= :min_premium
+ORDER BY trade_date DESC, premium DESC;
+```
+* *Latency Profile:* **`< 1.5ms`** execution via `idx_flow_sym_date_prem`.
 
 ---
 

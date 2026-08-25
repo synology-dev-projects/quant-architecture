@@ -34,6 +34,7 @@ LOW/MED IMPACT│  [P3] Quant Level PDF Parser   │  [P2] Prometheus Metrics
 ---
 
 ## 📦 Completed & Merged Milestones (Moved to completed_archive/)
+* ✅ **Smart `/flow` Overload for Single-Day Market Flow & Ticker Flow (`FLOW-03`)** (Released August 2026)
 * ✅ **Standalone Incremental & Deep Historical Options Flow Scripts, Dynamic Site Discovery, and In-Situ Vertical Tester (`FLOW-02`)** (Released August 2026)
 * ✅ **PostgreSQL 16 + TimescaleDB Migration & Oracle Deprecation (`DB-01`)** (Released August 2026)
 * ✅ **Unusual Options Flow Ingestion Pipeline & AI Agent Tool (`FLOW-01`)** (Released August 2026)
