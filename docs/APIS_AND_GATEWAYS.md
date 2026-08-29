@@ -140,6 +140,73 @@ sequenceDiagram
 
 ---
 
+### 3.5 Ticker Cockpit Endpoints (`/api/cockpit/*`)
+
+#### 3.5.1 Cockpit Unified Data Aggregator (`GET /api/cockpit/data`)
+* **Endpoint:** `GET /api/cockpit/data?ticker=<SYMBOL>`
+* **Auth:** Bearer Session Token (`Authorization: Bearer <token>`)
+* **Parameters:**
+  - `ticker` (string, required): US Equity/Index symbol (e.g. `NVDA`, `SPY`, `TSLA`).
+* **Execution Latency:** Sub-100ms in-process aggregation.
+* **Payload Structure (`200 OK`):**
+  ```json
+  {
+    "ticker": "NVDA",
+    "status": "success",
+    "gex": {
+      "spot_price": 217.55,
+      "zero_gex_level": 211.20,
+      "call_wall": 220.0,
+      "put_wall": 220.0,
+      "net_gex": 209912341389.29,
+      "net_dex": 25546999485.99,
+      "gamma_regime": "Positive (Long Gamma / Volatility Dampening)",
+      "strike_distribution": { ... }
+    },
+    "flow": {
+      "records": [ ... ],
+      "total_count": 18
+    },
+    "metrics": {
+      "spot_price": 217.55,
+      "zero_gamma_flip": 211.20,
+      "call_wall": 220.0,
+      "put_wall": 220.0,
+      "net_gex": 209912341389.29,
+      "net_dex": 25546999485.99,
+      "gamma_regime": "Positive (Long Gamma / Volatility Dampening)",
+      "total_30d_flow_volume": 41088000,
+      "call_flow": 30288000,
+      "put_flow": 10800000,
+      "call_pct": 73.71,
+      "put_pct": 26.29,
+      "whale_count": 15,
+      "unusual_oi_count": 0,
+      "confluence_bias": "BULLISH CONFLUENCE"
+    }
+  }
+  ```
+
+#### 3.5.2 Streaming Synergized Tactical Synthesis (`POST /api/cockpit/synthesis/stream`)
+* **Endpoint:** `POST /api/cockpit/synthesis/stream`
+* **Auth:** Bearer Session Token (`Authorization: Bearer <token>`)
+* **Content-Type:** `application/json`
+* **Payload:**
+  ```json
+  {
+    "ticker": "NVDA",
+    "gex": { ... },
+    "flow": { ... },
+    "confluence": { ... }
+  }
+  ```
+* **Streaming Protocol:** Server-Sent Events (`text/event-stream`) streaming Markdown tokens directly to client DOM:
+  - `data: {"type": "token", "content": "..."}`
+  - `data: {"type": "done"}`
+* **Model Selection:** Automatically invokes Tier 1 / Tier 2 Gemini models for cross-asset gamma and institutional tape synthesis.
+
+---
+
 ## 4. Model Context Protocol (MCP) Server Specifications
 
 The Gateway exposes standard Model Context Protocol (MCP) transports for autonomous agents:

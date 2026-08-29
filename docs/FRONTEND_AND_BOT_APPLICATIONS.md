@@ -107,6 +107,34 @@ quant-pwa/
 
 ---
 
+### 1.8 Ticker Cockpit 3-Panel Dashboard & Search View (`cockpit_view.js`)
+* **Dedicated Mobile Navigation Tab:** Pluggable tab view managed by `TabManager` (`/cockpit`), providing instant single-ticker intelligence combining dealer gamma positioning with multi-week institutional options tape.
+* **Persistent Search Bar & Quick Suggestion Ergonomics:**
+  - Fixed mobile-optimized search header with uppercase transformation, autofocus, and zero-flicker submission.
+  - Horizontally scrollable quick suggestion chips (`NVDA`, `SPY`, `TSLA`, `AAPL`, `QQQ`, `AMD`) for one-tap ticker analysis.
+  - Client-side search history persistence via `localStorage.cockpit_recents` (retaining the 6 most recently analyzed tickers).
+* **3-Panel Dashboard Layout:**
+  - **Panel 1: Synergized Tactical Synthesis (Hero Card):**
+    * **Confluence Sentiment Pill:** Color-coded institutional bias pill (`BULLISH CONFLUENCE` in emerald `#10b981`, `BEARISH CONFLUENCE` in crimson `#ef4444`, `NEUTRAL / MIXED` in amber `#f59e0b`).
+    * **Microstructure Metric Pills:** Displays Live Gamma Regime, 30D Flow Call/Put Ratio (`73.7% Calls`), and Call/Put Wall Range Corridor.
+    * **Live Streaming Synthesis (`/api/cockpit/synthesis/stream`):** Streams real-time AI strategic synthesis combining options gamma positioning with multi-week institutional tape flow via SSE with markdown rendering and typing animation.
+  - **Panel 2: Interactive Exposure Chart & Key Levels Strip:**
+    * **Zero-Dependency Canvas Engine:** High-DPI HTML5 canvas rendering Call vs. Put strike distribution.
+    * **Net GEX | Net DEX Interactive Toggle:** Instant client-side switching between Gamma Exposure ($/pt) and Delta Exposure ($/share) distributions without upstream re-fetching.
+    * **Key Levels HUD Strip:** Monospace indicator ribbon rendering Spot Price, Zero Gamma Flip point, Call Resistance Wall, and Put Support Wall.
+  - **Panel 3: 30-Day Options Flow Table:**
+    * **Interactive Bloomberg Terminal Table:** Renders 20 prints per page with responsive horizontal scroll and monospace typography.
+    * **5 Instant Filter Chips:**
+      1. `[All]`: Full 30-day transaction history.
+      2. `[Whales >$1M]`: Filters trades with premium $\ge \$1,000,000$.
+      3. `[Calls]`: Bullish/Bearish call prints (`BUY_CALL`, `SELL_CALL`).
+      4. `[Puts]`: Bullish/Bearish put prints (`BUY_PUT`, `SELL_PUT`).
+      5. `[Unusual OI ⚠️]`: Institutional prints exceeding prevailing open interest (`IS_UNUSUAL_OI = 1`).
+    * **Tri-State Column Sorting & Secondary Tie-Breaker:** Full support for ascending/descending/natural order cycling with secondary tie-breaker sorting by premium descending.
+* **Automated In-Situ UI Test Harness (`test_cockpit_view.js`):** Comprehensive mock DOM probe validating 49 automated assertions across search ergonomics, 3-panel mounting, filter chip transitions, GEX/DEX toggling, tri-state sorting, and localStorage persistence.
+
+---
+
 ## 2. Discord Quant Bot (`discord-quant-bot`)
 
 ### 2.1 Architecture
@@ -134,3 +162,4 @@ sequenceDiagram
 1. **Zero-Trust Channel Allowlist:** Only responds in approved Discord server channels (`ALLOWED_CHANNELS`).
 2. **Message Chunking:** Splits long analyses into $\le 1900$-character batches to prevent Discord HTTP 400 crashes.
 3. **Safe Error Masking:** Catches exceptions and outputs user-friendly notices without leaking internal server IPs or database connection strings.
+
