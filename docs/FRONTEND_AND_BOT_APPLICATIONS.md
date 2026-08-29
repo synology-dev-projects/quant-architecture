@@ -89,9 +89,13 @@ quant-pwa/
   - **Pagination Controls (`.bb-pagination`):** Renders institutional `◄ PREV` and `NEXT ►` buttons, dynamic page jump numbers (`.bb-page-num`), and print counter (`PAGE X OF Y (N PRINTS)`).
   - **Zero-Latency In-Memory Payload:** Embedded `<script type="application/json" class="tbl-payload">` serializes all parsed table records into DOM memory, enabling instant client-side page transitions with 0 server roundtrips.
 * **Interactive Monospace Column Sorting (▲/▼):**
-  - **Tri-State Sort Cycle:** Clicking any column header toggles between `None -> Ascending (▲) -> Descending (▼) -> Natural`.
+  - **Tri-State Sort Engine:** Clicking any column header cycles through `Descending (▼) -> Ascending (▲) -> Reset to Natural Order (Default)`. Natural order restores the original extracted chronological/importance sequence.
+  - **Secondary Tie-Breaker (Institutional Premium Descending):** When two or more records evaluate to identical primary sort values (e.g. matching strike prices or expiration dates), the engine applies a secondary tie-breaker sorting by `Premium` descending (highest dollar volume first).
+  - **Automatic Sort-Triggered Page Reset:** Initiating or cycling any column sort automatically resets active pagination back to `Page 1` to ensure top-ranked prints are immediately visible without manual scrolling.
   - **Automatic Data Type Detection (`detectColType`):** Intelligently parses column headers and cell values into `currency` (`$15.50M`, `$500K`), `percentage` (`+8.0%`, `-2.0%`), `date` (`2027-12-17`), `numeric` (OI / Volume integers), or `string`.
   - **Multi-Unit Currency Parsing (`parseSortValue`):** Accurately calculates numeric weights across billions (`B`), millions (`M`), and thousands (`K`) to ensure `$15.50M` ranks above `$500K` and `$88.00K`.
+* **Automated In-Situ UI Test Suite (`test_vertical_table_ui.js`):**
+  - High-fidelity mock DOM test harness executing 31 automated assertions across table rendering, 3-state sort transitions, secondary premium tie-breakers, sort class clearing, and multi-page pagination controls.
 * **Horizontal Scroll Wrapper (`.quant-table-scroll`):** Employs smooth momentum scrolling (`-webkit-overflow-scrolling: touch`) with high-density compact borders (`1px solid #1e293b`), dark backdrop (`#0c1017`), and customized slim scrollbars (`height: 5px`, `#334155` thumb) to ensure frictionless multi-column table navigation on mobile OLED displays without viewport overflow.
 * **Binary Action Indicator Badges:** Formats order actions into high-contrast institutional color pills:
   - **Bullish Actions (`.bb-action-bull`):** `BUY CALL`, `SELL PUT` rendered with dark emerald backdrop (`#064e3b`), vibrant text (`#34d399`), and border (`#059669`).

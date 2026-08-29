@@ -80,12 +80,13 @@ graph LR
    - **Multi-Year Extraction:** Pages through deep historical flow archives with high-efficiency batch inserts.
 
 3. **`verify_vertical.py` (In-Situ Vertical Slice Tester):**
-   - **5-Phase Verification Harness:** Executes an end-to-end dry-run validation against live production or fallback fixtures:
-     1. `[1/5] Extract:` Authenticates and fetches raw flow payloads.
-     2. `[2/5] Transform:` Verifies field types, OTM regex calculations, and SHA-256 hash generation.
-     3. `[3/5] Load:` Tests PostgreSQL connection, table creation, and idempotency (0 duplicates on re-insertion).
-     4. `[4/5] Read:` Executes single-flight multi-symbol query and formats summary via `flow_tool.py`.
-     5. `[5/5] Resilience:` Simulates empty inputs, malformed records, non-existent symbols, and database timeouts to ensure zero cascading failures.
+   - **6-Layer Verification Harness:** Executes an end-to-end dry-run validation against live production or fallback fixtures:
+     1. `[1/6] Extract:` Authenticates and fetches raw flow payloads.
+     2. `[2/6] Transform:` Verifies field types, OTM regex calculations, and SHA-256 hash generation.
+     3. `[3/6] Load:` Tests PostgreSQL connection, table creation, and idempotency (0 duplicates on re-insertion).
+     4. `[4/6] Read:` Executes single-flight multi-symbol query and formats summary via `flow_tool.py`.
+     5. `[5/6] Resilience:` Simulates empty inputs, malformed records, non-existent symbols, and database timeouts to ensure zero cascading failures.
+     6. `[6/6] Client UI:` Executes in-situ Node.js DOM test suite (`test_vertical_table_ui.js`) validating 31 assertions across tri-state column sorting, secondary tie-breakers, and client pagination.
 
 * **Target Table:** `unusual_option_flow_te` on PostgreSQL 16 (Port 5435).
 
@@ -95,4 +96,4 @@ graph LR
 
 1. **Failure Notification (`ntfy.py`):** Fatal exceptions trigger HTTP POST push notifications with priority 5 to `https://richntfynotifier.synology.me/alerts`.
 2. **Weekend & Holiday Invariance:** When scrapers execute on non-trading days and detect 0 new records, they log an informational event and terminate with `exit code 0` to prevent false positive CI/CD alerts.
-3. **In-Situ Vertical Testing:** All pipeline updates require `verify_vertical.py` execution prior to merge, enforcing 100% test coverage across live extraction, transformation, database upsert, and read paths.
+3. **In-Situ Vertical Testing:** All pipeline updates require `verify_vertical.py` execution prior to merge, enforcing 100% test coverage across live extraction, transformation, database upsert, read paths, and client DOM table rendering.
