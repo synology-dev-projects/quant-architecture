@@ -73,11 +73,16 @@ graph TD
   5. **Anti-Bloat (Zero-Bloat Mandate):** Eliminate redundant hops, resume-driven abstractions, and unnecessary complexity.
 - Reviewer outputs the **Enterprise Scorecard**, **Mandatory Engineering Fixes**, and **Target Lean Architecture**.
 
-### Phase 6: Staging Deploy, Hardware Validation & Production Promotion
-- **Strict Full Dev Cycle for All Fixes (Rule 1):** Every bug fix, hotfix, and refactor MUST follow the full lifecycle: `Local Test (Host + Docker + vertical_test_agent)` ➔ `develop2 (Staging Deploy & Hardware Live Verification)` ➔ `master (Production Promotion)`. Never fast-track or push fixes directly to `master`.
-- **Staging Vertical Test Gate:** Following deployment to Synology NAS staging (`:8096`), `vertical_test_agent` executes against the live staging container to verify the complete vertical slice before opening and merging PRs to `master`.
+### Phase 6: Staging Dual-Gate Validation, PR Merge & Production Promotion
+- **Strict Full Dev Cycle for All Fixes (Rule 1):** Every new feature, bug fix, and refactor MUST follow the full lifecycle: `Local Test (Host + Docker + vertical_test_agent)` ➔ `develop2 (Staging Deploy & Hardware Live Verification :8096)` ➔ `master (Production Promotion :8095)`. Never fast-track or push fixes directly to `master`.
+- **Phase 6a: Mandatory Dual Staging Validation Gates (Synology NAS :8096):**
+  Following deployment of `develop2` to the staging container (`:8096`), the Orchestrator MUST dispatch two staging verification agents:
+  1. **🧪 `vertical_test_agent` (Backend/Pipeline/SSE Gate):** Executes the full 6-layer in-situ vertical test suite against the live staging container (`:8096`), verifying database persistence, connector reads, and SSE streaming token latency.
+  2. **🖥️ `staging_devtools_agent` (Real-Browser & Visual UI Gate):** Launches headless Chromium via Chrome DevTools MCP against `http://192.168.1.68:8096`. Authenticates, executes user flows (Chatbot, Cockpit search, Flow table sorting, GEX/DEX toggle), audits console/network logs for zero errors, asserts non-zero DOM/Canvas values (`spot > 0`, `strikes.length > 0`), and captures full-page visual screenshot proof (`take_screenshot`).
+- **Phase 6b: PR Creation & Master Promotion (Production :8095):**
+  Only after BOTH `vertical_test_agent` and `staging_devtools_agent` return `PASSED` reports on `:8096` is the PR to `master` approved and merged.
 - **Zero Direct Local Push to Master (Rule 3 - Hard Invariant):** Under NO circumstances is direct local pushing to `master` allowed. `master` can ONLY be updated via merge from `develop`/`develop2` after staging verification.
-- **Produce Walkthrough Document:** Detail changes, hardware verification results, and key decisions made.
+- **Produce Walkthrough Document:** Detail changes, staging DevTools screenshot proofs, hardware verification results, and key decisions made.
 - **Mandatory Local Server Teardown:** Whenever local testing completes and changes are pushed to `develop`/`develop2` or `master`, agents MUST automatically terminate all local background testing processes (`uvicorn`, `http.server`, Chrome instances) to release local ports (`3000`, `8000`) and conserve PC memory.
 - **Mandatory Living Documentation Sync (Production-Only Hard Rule):** The `quant-architecture` repository is **ONLY updated and pushed when code is promoted to Production (`master` / `prod`)**. During staging/develop testing, `quant-architecture` remains frozen. Upon promotion/merging to `master`, agents MUST automatically update all corresponding design and architecture documents in `docs/` (`ARCHITECTURE_OVERVIEW.md`, `DATABASE_AND_DATA_MODELS.md`, `ETL_PIPELINES_AND_INGESTION.md`, `APIS_AND_GATEWAYS.md`, `FRONTEND_AND_BOT_APPLICATIONS.md`, `INFRASTRUCTURE_AND_CICD.md`), update `implementation_plans/00_ACTIVE_BACKLOG.md`, and commit/push `quant-architecture` to `origin master`. Outdated architecture documentation is treated as a critical system defect.
 

@@ -28,8 +28,12 @@ flowchart TD
     SixLayerSlice -->|Fail (Hard Failure)| Triage[🚨 Dispatch triage_and_fix_agent]
     
     Phase5 --> DeployStaging[Phase 6: Deploy to Synology NAS Staging :8096]
-    DeployStaging --> Gate6[Phase 6: 🧪 vertical_test_agent Staging Gate]
-    Gate6 -->|Pass| MergeMaster[PR Merge -> Master Production :8095]
+    DeployStaging --> StagingGates{Phase 6a: Staging Validation Gates}
+    StagingGates --> Gate6A[🧪 vertical_test_agent: 6-Layer Backend/SSE Pipe]
+    StagingGates --> Gate6B[🖥️ staging_devtools_agent: Real Chrome Browser UI]
+    Gate6A --> StagingPass{Both Gates Green?}
+    Gate6B --> StagingPass
+    StagingPass -->|Pass| MergeMaster[PR Merge -> Master Production :8095]
 ```
 
 ---

@@ -37,8 +37,11 @@ flowchart TD
     Fix --> ParallelWorkers
     DualAudits -->|Pass| P6[Phase 6: Staging Deploy & Hardware Validation]
     P6 --> NAS_Staging[Synology NAS :8096 Staging Container]
-    NAS_Staging --> V6[🧪 vertical_test_agent Staging Gate]
-    V6 -->|Pass| PR[GitHub PR: develop2 -> master]
+    NAS_Staging --> V6A[🧪 vertical_test_agent: Staging 6-Layer Gate]
+    NAS_Staging --> V6B[🖥️ staging_devtools_agent: Staging DevTools Gate]
+    V6A --> StagingOK{Both Gates Pass?}
+    V6B --> StagingOK
+    StagingOK -->|Pass| PR[GitHub PR: develop2 -> master]
     PR --> NAS_Prod[Synology NAS :8095 Prod Verification]
     NAS_Prod --> Docs[Update quant-architecture Docs & Archive]
 ```

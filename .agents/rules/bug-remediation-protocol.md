@@ -53,9 +53,12 @@ graph TD
 ### Step 3: Smallest Viable Diff (Strict YAGNI)
 - The subagent patches ONLY the lines necessary to fix the root cause with zero collateral churn.
 
-### Step 4: Multi-Agent Verification, Review & Lock-In
+### Step 4: Multi-Agent Staging Dual-Gate Verification, Review & Lock-In
 - The subagent runs local `pytest` to verify the fix (GREEN).
 - The Captain dispatches the `no-mistakes-reviewer` subagent for pre-merge adversarial review (Phase 5a).
 - For architectural changes, dispatch `architecture_review_agent` (Phase 5b).
-- The Captain deploys to `develop2` staging (`8091`/`8096`) for human validation.
-- Upon approval, promote to `master`, move the task from `00_ACTIVE_BACKLOG.md` to `completed_archive/`, and synchronize living documentation in `docs/`.
+- Deploy to `develop2` staging (`8096`).
+- **Mandatory Dual Staging Validation Gates (Synology NAS :8096):**
+  1. Dispatch `vertical_test_agent` against the live staging container (`:8096`) to verify the 6-layer pipeline and SSE stream.
+  2. Dispatch `staging_devtools_agent` via Chrome DevTools MCP against `http://192.168.1.68:8096` to execute real-browser UI regression tests, audit console logs, verify non-zero DOM/Canvas geometry, and capture visual screenshot proof.
+- Upon 100% green staging verification, promote/merge PR to `master` (Production `:8095`), move the task from `00_ACTIVE_BACKLOG.md` to `completed_archive/`, and synchronize living documentation in `docs/`.
