@@ -1,4 +1,4 @@
-﻿# 🎬 Subagent Spec: Orchestrator (`orchestrator`)
+# 🎬 Subagent Spec: Orchestrator (`orchestrator`)
 
 > **Role:** Master SDLC & Multi-Agent Development Lifecycle Orchestrator  
 > **Type Name:** `orchestrator`  
@@ -24,8 +24,9 @@ flowchart TD
         P3 --> DE[🔄 pipeline_agent]
     end
     
-    ParallelWorkers --> P4[Phase 4: Local Test Gate & Docker Containers]
-    P4 --> P5[Phase 5: Adversarial Dual Audit]
+    ParallelWorkers --> P4[Phase 4: Local Unit & Docker Tests]
+    P4 --> V4[🧪 vertical_test_agent Local Gate]
+    V4 --> P5[Phase 5: Adversarial Dual Audit]
     
     subgraph DualAudits [Adversarial Quality & Scale Audits]
         P5 --> QA[🔍 research: No-Mistakes Quality Audit]
@@ -34,9 +35,10 @@ flowchart TD
     
     DualAudits -->|Fail / Blockers| Fix[🛑 Stop / Wind Up Fix Crew]
     Fix --> ParallelWorkers
-    DualAudits -->|Pass| P6[Phase 6: Staging Deploy & Prod Promotion]
-    P6 --> NAS_Staging[Synology NAS :8096 Staging Verification]
-    NAS_Staging --> PR[GitHub PR: develop2 -> master]
+    DualAudits -->|Pass| P6[Phase 6: Staging Deploy & Hardware Validation]
+    P6 --> NAS_Staging[Synology NAS :8096 Staging Container]
+    NAS_Staging --> V6[🧪 vertical_test_agent Staging Gate]
+    V6 -->|Pass| PR[GitHub PR: develop2 -> master]
     PR --> NAS_Prod[Synology NAS :8095 Prod Verification]
     NAS_Prod --> Docs[Update quant-architecture Docs & Archive]
 ```

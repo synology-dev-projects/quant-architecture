@@ -50,13 +50,11 @@ graph TD
 - **Configuration Hygiene:** Read all parameters from `MainConfig` or environment variables; never hardcode credentials, ports, or URLs.
 - **Failure Resilience:** Wrap network operations in exponential backoff retries and explicit timeouts.
 
-### Phase 4: Local In-Situ Verification Gate (Host + Docker Container)
+### Phase 4: Local In-Situ Verification & Vertical Testing Gate
 - Write comprehensive unit tests in `tests/` covering both happy paths and negative edge cases.
-- Execute local `./verify.sh` or `pytest` in the workspace to confirm:
-  - Static typechecks pass with 0 errors.
-  - All unit tests pass with `exit code 0` in <5 seconds.
-  - Zero database mutations occur against production tables.
-- **Mandatory Local Docker Container Verification:** For any changes involving dependencies (`requirements.txt`), services, environment variables, or file system volume mounts (`common_config`, `common_lib`), agents MUST build and run the local Docker Compose stack (`docker compose up --build -d`) to verify that the container mounts, dependencies, and network connections function identically in Docker before pushing to staging.
+- Execute local `./verify.sh` or `pytest` in the workspace to confirm unit tests pass with `exit code 0` in <5 seconds.
+- **Mandatory Vertical Testing Agent Gate (`vertical_test_agent`):** In addition to unit tests, the `orchestrator` MUST dispatch `vertical_test_agent` to exercise the full 6-layer in-situ vertical slice (Extract ➔ Transform ➔ Postgres Upsert & Idempotency ➔ Connector Read ➔ Gateway Tool ➔ SSE Stream). Any integration break halts progress and triggers `triage_and_fix_agent` before Phase 5 code reviews.
+- **Mandatory Local Docker Container Verification:** For any changes involving dependencies (`requirements.txt`), services, environment variables, or file system volume mounts (`common_config`, `common_lib`), agents MUST build and run the local Docker Compose stack (`docker compose up --build -d`) to verify container mounts, dependencies, and network connections function identically in Docker before pushing to staging.
 
 ### Phase 5a: "No-Mistakes" Quality Review Gate
 - Run the `no-mistakes-reviewer` subagent on the git diff to audit:
@@ -76,7 +74,8 @@ graph TD
 - Reviewer outputs the **Enterprise Scorecard**, **Mandatory Engineering Fixes**, and **Target Lean Architecture**.
 
 ### Phase 6: Staging Deploy, Hardware Validation & Production Promotion
-- **Strict Full Dev Cycle for All Fixes (Rule 1):** Every bug fix, hotfix, and refactor MUST follow the full lifecycle: `Local Test (Host + Docker)` ➔ `develop2 (Staging Deploy & Hardware Live Verification)` ➔ `master (Production Promotion)`. Never fast-track or push fixes directly to `master`.
+- **Strict Full Dev Cycle for All Fixes (Rule 1):** Every bug fix, hotfix, and refactor MUST follow the full lifecycle: `Local Test (Host + Docker + vertical_test_agent)` ➔ `develop2 (Staging Deploy & Hardware Live Verification)` ➔ `master (Production Promotion)`. Never fast-track or push fixes directly to `master`.
+- **Staging Vertical Test Gate:** Following deployment to Synology NAS staging (`:8096`), `vertical_test_agent` executes against the live staging container to verify the complete vertical slice before opening and merging PRs to `master`.
 - **Zero Direct Local Push to Master (Rule 3 - Hard Invariant):** Under NO circumstances is direct local pushing to `master` allowed. `master` can ONLY be updated via merge from `develop`/`develop2` after staging verification.
 - **Produce Walkthrough Document:** Detail changes, hardware verification results, and key decisions made.
 - **Mandatory Local Server Teardown:** Whenever local testing completes and changes are pushed to `develop`/`develop2` or `master`, agents MUST automatically terminate all local background testing processes (`uvicorn`, `http.server`, Chrome instances) to release local ports (`3000`, `8000`) and conserve PC memory.
