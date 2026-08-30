@@ -183,4 +183,55 @@ def _get_postgres_engine_cached(
 * `pool_pre_ping=True`: Emits a lightweight `SELECT 1` probe before checkout to automatically recover from dropped connections.
 * **Context-Managed Sessions:** Connections are checked out and returned via `with engine.begin() as conn:`.
 
+---
+
+## 5. Universal Schema Auto-Migration Engine (`ensure_all_schemas()`) [DB-01]
+
+To eliminate table-missing runtime failures, cold-start bootstrapping drift, and manual SQL migration overhead across ephemeral development and production deployments, the Quant System implements an **idempotent auto-migration engine** in [`common-lib/common_lib/database/schemas.py`](file:///C:/Coding/VSCode/Quant%20System/common-lib/common_lib/database/schemas.py).
+
+### 5.1 Architecture & Lifespan Hook
+The auto-migration engine is executed automatically during FastAPI application startup within the `lifespan` context manager in `gateway/app/main.py`:
+
+```python
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Idempotently verify and create all canonical database schemas
+    try:
+        from common_lib.database import ensure_all_schemas
+        migration_results = ensure_all_schemas()
+        logger.info(f"Database schemas verified: {migration_results}")
+    except Exception as e:
+        logger.warning(f"Schema verification warning during startup: {e}")
+    yield
+```
+
+### 5.2 Managed Canonical Schemas Catalog (`SCHEMAS`)
+The engine maintains declarative DDL statements for all core relational tables and composite indexes in PostgreSQL 16:
+
+1. **`unusual_whales_flow_te`**:
+   - Primary Key: `(symbol, trade_date, strike, call_put, exp_date, premium)`
+   - Composite Index: `idx_flow_symbol_date (symbol, trade_date)`
+   - Stores real-time & batch institutional options flow, OTM flags, whale sentiments, and spot price correlations.
+
+2. **`quant_lvl_data_te`**:
+   - Primary Key: `(symbol, datetime, quant_level_type, price_level)`
+   - Composite Index: `idx_quant_lvl_symbol_dt (symbol, datetime)`
+   - Stores daily quantitative support, resistance, reversal, and buy/sell execution zones.
+
+3. **`ibkr_historical_te`**:
+   - Primary Key: `(symbol, datetime)`
+   - Composite Index: `idx_ibkr_symbol_dt (symbol, datetime)`
+   - Stores OHLCV bars, trade counts, and volume-weighted average price (WAP) bars.
+
+4. **`chat_history`**:
+   - Primary Key: `id (SERIAL)`
+   - Composite Index: `idx_chat_session_id (session_id)`
+   - Stores multi-turn conversational session history, agent tool invocations, and JSONB metadata.
+
+### 5.3 Execution Semantics & Idempotency
+- **Atomic Transaction Wrapping:** Schema DDL blocks are executed inside an atomic transaction (`with engine.begin() as conn:`).
+- **Idempotency:** Utilizes `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS` to ensure zero runtime impact or lock escalation during warm reboots.
+- **Dynamic Config/Engine Resolution:** `ensure_all_schemas()` accepts an optional `Engine`, `MainConfig`, `dict`, or `None` (resolving via `get_postgres_engine()`), enabling seamless usage across unit tests, CI test gates, and container lifecycles.
+
+
 

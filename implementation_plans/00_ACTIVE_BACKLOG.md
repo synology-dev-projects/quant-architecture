@@ -34,6 +34,8 @@ LOW/MED IMPACT│  [P3] Quant Level PDF Parser   │  [P2] Prometheus Metrics
 ---
 
 ## 📦 Completed & Merged Milestones (Moved to completed_archive/)
+* ✅ **Universal Schema Auto-Migration Engine with Declarative PostgreSQL 16 DDL (`DB-01` / `ensure_all_schemas`)** (Released August 2026)
+* ✅ **Automated UI & Layout Geometry Verification Engine & Headless CSS Cascade Prober (`UI-01` / `audit_layout.js`)** (Released August 2026)
 * ✅ **Consolidated 4-Stage Fail-Fast CI/CD Pipeline, Master Agent Test Runner CLI & Workspace-Wide Pre-Commit Standardization (`CICD-01` / `TEST-01`)** (Released August 2026)
 * ✅ **MCP Universal Dual-Transport (Zero-405/404), Bounded Async Queues & Semantic v1.0.3 Release (`MCP-01` / `v1.0.3`)** (Released August 2026)
 * ✅ **Quant Levels Database Table Freshness Status Indicator, Manual Sync Button & Semantic v1.0.2 Centralized Versioning (`SETTINGS-06` / `v1.0.2`)** (Released August 2026)

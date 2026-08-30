@@ -57,13 +57,35 @@ graph TD
 * **Actions:**
   - Installs Python 3.11+ and Node.js 20+ via `actions/setup-node@v4`.
   - Runs host AST compilation checks: `python -m py_compile **/*.py`.
-  - Executes Node.js DOM and Settings Modal unit tests: `node frontend/tests/test_settings_modal.js` and `node tests/test_settings_modal.js`.
+  - Executes Version Parity Check: `python scripts/bump_version.py --check`.
+  - Executes Node.js DOM and Settings Modal unit tests:
+    * `node frontend/tests/test_settings_flow_modal.js`
+    * `node frontend/tests/test_cockpit_view.js`
+    * `node frontend/tests/test_vertical_table_ui.js`
+    * `node frontend/tests/audit_layout.js` (UI-01 Layout Geometry Verification)
   - Installs Gateway dependencies (`fastapi`, `httpx`, `pytest`, `pydantic`) and executes offline unit tests:
     ```bash
     pytest -m "not integration" gateway/tests/
     ```
 * **Latency:** ~6–10 seconds.
 * **Failure Impact:** Halts pipeline immediately without touching the NAS.
+
+#### 1.1 Automated UI & Layout Geometry Verification Engine (UI-01 / `audit_layout.js`)
+To guarantee visual stability, mobile responsiveness, and zero-defect UI layouts across heterogeneous display form factors, the pre-flight gate executes an automated headless CSS geometry analyzer [`frontend/tests/audit_layout.js`](file:///C:/Coding/VSCode/Quant%20System/quant-pwa/frontend/tests/audit_layout.js):
+
+1. **Responsive Viewport Auditing:**
+   - Evaluates CSS cascade across simulated viewport widths: **375px (Mobile)**, **768px (Tablet)**, and **1280px (Desktop)**.
+   - Parses `@media (max-width: ...)` and `@media (min-width: ...)` query blocks to compute viewport-specific layout properties.
+2. **Touch-Target Accessibility (WCAG 2.1 AA):**
+   - Validates that all interactive controls (`.btn`, `.nav-item`, `.tab-btn`, `.settings-btn`, `.modal-close`) meet or exceed minimum touch target dimensions ($\ge 44\text{px}$ tap height/width, or $\ge 36\text{px}$ with minimum $8\text{px}$ bounding hit-box padding).
+3. **Modal Box-Sizing & Alignment Geometry:**
+   - Validates `.modal-body` and `.settings-actions` containers for `box-sizing: border-box`, `width: 100%`, and zero negative margins (`margin-left: 0`, `margin-right: 0`).
+   - Ensures `.btn-modal-action` elements render with `flex: 1` and centered content justification without clipping or visual bleeding.
+4. **Zero Horizontal Layout Overflow:**
+   - Probes Ticker Cockpit Panels (1, 2, and 3) and Bloomberg Options Flow Table container for horizontal scroll containment (`overflow-x: auto` / `overflow: hidden`).
+   - Ensures root document elements (`html, body`) enforce strict horizontal scroll locking (`overflow-x: hidden`).
+5. **Execution Latency:**
+   - Executes in **`< 300ms`** in pure Node.js without requiring Chromium/Puppeteer runtime overhead.
 
 ### Stage 2: Prepare Synology Deployment Directory & Secrets
 * **Environment:** Synology NAS Self-Hosted Runner.
