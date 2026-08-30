@@ -140,9 +140,24 @@ sequenceDiagram
 
 ---
 
-### 3.5 Ticker Cockpit Endpoints (`/api/cockpit/*`)
+### 3.5 Options Flow Status & Synchronous Cache Invalidation (`/api/flow/*`)
 
-#### 3.5.1 Cockpit Unified Data Aggregator (`GET /api/cockpit/data`)
+#### 3.5.1 Options Flow Freshness Check (`GET /api/flow/status`)
+* **Endpoint:** `GET /api/flow/status`
+* **Auth:** Public / Unauthenticated
+* **Purpose:** Evaluates latest `MAX(trade_date)` from `unusual_option_flow_te` against the last completed US market session. Returns `status: "synced"` (`is_fresh: true`) or `status: "stale"` (`is_fresh: false`).
+
+#### 3.5.2 Manual Pipeline Trigger & Synchronous Invalidation (`POST /api/flow/sync`)
+* **Endpoint:** `POST /api/flow/sync`
+* **Auth:** Bearer Session Token (`get_current_user`).
+* **Execution:** Triggers `common_lib.flow.runner.run_daily_incremental()` and immediately calls `clear_flow_cache()`.
+* **Cache Invalidation:** Atomically purges both `_FLOW_MEMORY_CACHE` and `_LAST_EXECUTED_FLOW_RESULT` under `_FLOW_CACHE_LOCK`, guaranteeing zero stale reads across subsequent LLM streaming chat requests.
+
+---
+
+### 3.6 Ticker Cockpit Endpoints (`/api/cockpit/*`)
+
+#### 3.6.1 Cockpit Unified Data Aggregator (`GET /api/cockpit/data`)
 * **Endpoint:** `GET /api/cockpit/data?ticker=<SYMBOL>`
 * **Auth:** Bearer Session Token (`Authorization: Bearer <token>`)
 * **Parameters:**

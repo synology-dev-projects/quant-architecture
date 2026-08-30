@@ -8,7 +8,8 @@
 ## 1. Core Operating Principles
 - **Strict YAGNI (Anti-Bloat):** Implement ONLY what is explicitly requested. Do not introduce speculative wrappers, unneeded utility classes, or unsolicited styling churn.
 - **Smallest Viable Diff:** Strive for clean, minimal diffs that solve the root cause with zero collateral complexity.
-- **Plan First:** Always create or update an `implementation_plan.md` before making multi-file modifications.
+- **Mandatory Prior Plan Approval Gate (HARD INVARIANT):** NO code changes (modifications, creations, or deletions to source code) are allowed before an explicit `implementation_plan.md` has been presented and explicitly approved by the user. Zero code edits before prior plan approval.
+- **Mandatory Multi-Agent Workflow Selection Gate (HARD INVARIANT):** Whenever the user approves an implementation plan, the agent **MUST ALWAYS ask the user which multi-agent workflow to use** (e.g. Standard Full Fleet, Targeted Crew, Pair Programming, etc.) and wait for the user's response before dispatching subagents or executing any implementation.
 - **Bug Remediation Protocol:** When resolving bugs, strictly follow the 4-step loop (Isolate 1-2 bugs -> Write failing test -> Smallest viable diff -> Local verify & rule lock-in). Prioritize Tier 1 (Data loss & Concurrency) before Tier 2/3.
 - **Zero-Lost Bugs Invariant (MANDATORY):** Whenever a defect, bug, regression, or technical debt item is identified or mentioned during pair programming or review that is NOT immediately fixed in the current turn, the agent MUST immediately log it into `implementation_plans/00_ACTIVE_BACKLOG.md` (and generate a dedicated RFC spec in `p0_...`, `p1_...`, `p2_...`, or `p3_...` for high-impact items). Never let a mentioned bug remain only in ephemeral chat prose.
 - **Feature Development Protocol:** When building new features, follow the 6-phase lifecycle (Architecture RFC -> Dependency sequencing -> Strict YAGNI implementation -> Local test gate -> No-Mistakes review -> PR summary).
@@ -17,11 +18,6 @@
   - *Database / Pipelines / ETL:* MUST view `.agents/rules/oracle-concurrency.md` and `.agents/rules/pipeline-standards.md`.
   - *Frontend / Mobile PWA:* MUST view `docs/FRONTEND_AND_BOT_APPLICATIONS.md`.
 - **Mandatory Local End-to-End Test Gate (Hard Rule):** NEVER commit or push code to git without first executing end-to-end local testing with real requests and automated test suites (`pytest`). For ANY new feature, bug fix, or hotfix, local in-situ verification MUST pass 100% before requesting approval or running `git commit`.
-- **Mandatory Local Docker Container & Volume Verification (Rule 2):** For any changes to dependencies, environment variables, services, or configurations, you MUST test the application inside local Docker containers (`docker compose up --build`) before pushing to staging. This guarantees that file volume mounts (`common_config`, `common_lib`), dependencies (`requirements.txt`), and container networking function identically inside Docker as they do in the host interpreter.
-- **Strict Full Dev Cycle for All Fixes (Rule 1):** Every bug fix, hotfix, and refactor MUST follow the identical standard engineering lifecycle: `Local Test (Host + Docker)` ➔ `develop2 (Staging Deploy & Hardware Verification)` ➔ `master (Production Promotion)`. Never fast-track or bypass the staging environment for "quick" fixes.
-- **Zero Direct Local Push to Master (Rule 3 - Hard Invariant):** Under NO circumstances is direct local pushing to `master` allowed. The `master` branch (Production) must ONLY be updated via merge from `develop`/`develop2` after successful staging deployment and hardware verification.
-- **Mandatory Automatic Multi-Agent Delegation (Rule 4 - Hard Invariant):** Whenever a feature implementation, refactor, bug fix, or review is approved, the parent planner agent MUST automatically dispatch specialized Subagents (`backend_agent`, `frontend_agent`, `research`, `architecture_review_agent`) to execute the work concurrently and conduct independent quality/architectural audits rather than writing code in the planner thread.
-- **Zero-Compound Command Chaining (Rule 5 - Hard Invariant):** NEVER chain commands using semicolons (`;`), `&&`, or `||` across disparate tools in a single `run_command` call. Every command MUST start cleanly with a naked executable (`git ...`, `gh ...`, `docker ...`, `python ...`). This enables Antigravity's permission sandbox to match tool prefixes (`command(git*)`, `command(gh*)`) and eliminates opaque command prompt popups.
 - **Self-Verification Gate:** Always execute `./verify.sh` or `pytest` locally inside the workspace before presenting code. Never declare a task complete without passing tests.
 
 ---
@@ -60,15 +56,11 @@
 
 | Role | Name | Trigger / Purpose |
 | :--- | :--- | :--- |
-| **Orchestrator** | `orchestrator` | **Primary Mandatory Entrypoint.** Enforces 6-Phase Lifecycle, spawns/kills/stops agents, and coordinates dual audits. |
-| **Incident & Triage Fixer** | `triage_and_fix_agent` | **CI/CD & Bug Remediation.** Automated 4-tier triage, local Docker repro, direct `develop2` fix, SSH host restart, 3-attempt circuit breaker. |
-| **Vertical Integration Tester** | `vertical_test_agent` | **Phase 4 Local & Phase 6a Staging (:8096) Gate.** 6-layer end-to-end pipe verification (Extract -> DB -> Tool -> SSE). |
-| **Staging Real-Browser Tester** | `staging_devtools_agent` | **Phase 6a Staging (:8096) Gate.** Headless Chromium via Chrome DevTools MCP, visual geometry, console logs, and screenshot proof. |
-| **API / Engine Engineer** | `backend_agent` | FastAPI endpoints, in-process calculation engine, circuit breakers, Oracle queries, and SSE streaming. |
-| **UI / Frontend Engineer** | `frontend_agent` | Mobile PWA, vanilla JavaScript, Canvas options charts, telemetry HUD, and Bloomberg-grade CSS. |
-| **Data / Scraper Engineer** | `pipeline_agent` | TradingEdge scrapers, ETL parsing, incremental watermarking, and dynamic UUID staging loaders. |
-| **Reviewer (Quality)** | `research` | "No-Mistakes Quality Reviewer" auditing Security, Concurrency, Math Precision, and Test Coverage. |
-| **Reviewer (Architecture)** | `architecture_review_agent` | "Enterprise Principal Systems Architect" auditing 1,000 DAU scale, Latency, Maintainability, and Zero-Bloat. |
+| **Orchestrator** | `captain` | Cross-repo planning, dependency sequencing, and task dispatching. |
+| **Data Engineer** | `pipeline-crew` | Scrapers, ETL transformations, rate limits, and Oracle upsert loaders. |
+| **API Engineer** | `backend-crew` | FastAPI endpoints, SQLAlchemy pooling, DTE math, and SSE streaming. |
+| **Reviewer (Quality)** | `no-mistakes` | Adversarial pre-commit audit (Security, Concurrency, Precision, Tests). |
+| **Reviewer (Architecture)** | `architecture-review-agent` | Enterprise systems evaluation for 1,000 DAU scale (Scalability, Cost, Zero-Bloat). |
 
 ---
 
