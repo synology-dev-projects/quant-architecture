@@ -34,6 +34,7 @@ LOW/MED IMPACT│  [P3] Quant Level PDF Parser   │  [P2] Prometheus Metrics
 ---
 
 ## 📦 Completed & Merged Milestones (Moved to completed_archive/)
+* ✅ **App Version Reset to v1.0.1, Environment-Tagged Badging & Settings Action Button Centering (`SETTINGS-05`)** (Released August 2026)
 * ✅ **PostgreSQL 16 Migration & Complete Oracle XE Retirement (`DB-01` / `ORACLE-RETIRE`)** (Released August 2026)
 * ✅ **Options Flow Data Freshness Status Card & Conditional Manual Sync (`SETTINGS-04`)** (Released August 2026)
 * ✅ **Tri-Mode GEX / DEX / Both Exposure Chart Switcher (`COCKPIT-02`)** (Released August 2026)
