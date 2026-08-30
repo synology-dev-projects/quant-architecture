@@ -202,8 +202,35 @@ sequenceDiagram
   ```
 * **Streaming Protocol:** Server-Sent Events (`text/event-stream`) streaming Markdown tokens directly to client DOM:
   - `data: {"type": "token", "content": "..."}`
-  - `data: {"type": "done"}`
-* **Model Selection:** Automatically invokes Tier 1 / Tier 2 Gemini models for cross-asset gamma and institutional tape synthesis.
+### 3.3 Options Flow Status & Manual Ingestion Endpoints (`/api/flow/*`)
+
+#### 1. Flow Freshness Status (`GET /api/flow/status`)
+* **Auth:** None (Public / Client Evaluated)
+* **Purpose:** Evaluates `MAX(trade_date)` in `unusual_option_flow_te` against the last active trading market day (handles weekends and 6:30 AM trading day cutoffs).
+* **Response (`200 OK`):**
+  ```json
+  {
+    "status": "synced",
+    "is_fresh": true,
+    "latest_trade_date": "2026-08-29",
+    "last_market_day": "2026-08-28",
+    "total_records": 2345,
+    "last_session_records": 0,
+    "message": "Flow data is up to date (Session: 2026-08-29)."
+  }
+  ```
+
+#### 2. Manual Flow Ingestion Sync (`POST /api/flow/sync`)
+* **Auth:** `Authorization: Bearer <SESSION_TOKEN>` (Protected)
+* **Purpose:** Triggers on-demand incremental options flow ingestion in-process or host runner.
+* **Response (`200 OK`):**
+  ```json
+  {
+    "status": "ok",
+    "message": "Options Flow sync completed successfully. Ingested 820 records.",
+    "rows_upserted": 820
+  }
+  ```
 
 ---
 

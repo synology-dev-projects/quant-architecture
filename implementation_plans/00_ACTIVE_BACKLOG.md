@@ -34,6 +34,8 @@ LOW/MED IMPACT│  [P3] Quant Level PDF Parser   │  [P2] Prometheus Metrics
 ---
 
 ## 📦 Completed & Merged Milestones (Moved to completed_archive/)
+* ✅ **Options Flow Data Freshness Status Card & Conditional Manual Sync (`SETTINGS-04`)** (Released August 2026)
+* ✅ **Tri-Mode GEX / DEX / Both Exposure Chart Switcher (`COCKPIT-02`)** (Released August 2026)
 * ✅ **Ticker Cockpit 3-Panel Dashboard, Live Search View & Streaming Synergized Tactical Synthesis (`COCKPIT-01`)** (Released August 2026)
 * ✅ **Tri-State Column Sorting Engine with Secondary Tie-Breaker and Layer 6 Automated UI Probe (`FLOW-08`)** (Released August 2026)
 * ✅ **Streamlined Pure-Data Options Flow Skill with Interactive Paginated Bloomberg Terminal Table UI (`FLOW-07`)** (Released August 2026)
