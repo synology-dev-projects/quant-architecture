@@ -98,13 +98,14 @@ Stores daily quantitative support, resistance, reversal, and bounce levels extra
 
 ---
 
-### 2.3 `ticker_data_ibkr` (Interactive Brokers Historical Tick & Bar Data)
+### 2.3 `ibkr_historical_te` (Interactive Brokers Historical Tick & Bar Data)
 Stores OHLCV and volume-weighted average price (WAP) historical market bars.
 
 | Column Name | PostgreSQL Data Type | Nullable | Primary Key | Description |
 | :--- | :--- | :---: | :---: | :--- |
 | `symbol` | `VARCHAR(32)` | NO | 🔑 PK | Ticker symbol (e.g. `SPY`, `TSLA`). |
 | `datetime` | `TIMESTAMP` | NO | 🔑 PK | Bar open timestamp in UTC. |
+| `barsize` | `VARCHAR(16)` | NO | 🔑 PK | Granularity of the bar (e.g. `1 min`, `5 mins`, `1 hour`, `1 day`). |
 | `open` | `NUMERIC(12, 4)` | YES | - | Opening price of the bar interval. |
 | `high` | `NUMERIC(12, 4)` | YES | - | Highest traded price during the interval. |
 | `low` | `NUMERIC(12, 4)` | YES | - | Lowest traded price during the interval. |
@@ -112,7 +113,6 @@ Stores OHLCV and volume-weighted average price (WAP) historical market bars.
 | `volume` | `BIGINT` | YES | - | Total share/contract volume traded. |
 | `barcount` | `INTEGER` | YES | - | Number of completed trades during the bar. |
 | `wap` | `NUMERIC(12, 4)` | YES | - | Volume-Weighted Average Price (WAP) calculated by IBKR. |
-| `barsize` | `VARCHAR(16)` | YES | - | Granularity of the bar (e.g. `1 min`, `5 mins`, `1 hour`, `1 day`). |
 
 ---
 

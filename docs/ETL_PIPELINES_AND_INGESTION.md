@@ -17,9 +17,9 @@ graph LR
     end
 
     subgraph LoadPhase [3. Load (load.py)]
-        Validated --> Staging[UUID Temp Staging Table]
-        Staging --> Merge[Atomic Oracle MERGE INTO]
-        Merge --> Destination[(Production Oracle Table)]
+        Validated --> UpsertEngine[insert_into_table / write_to_postgres_upsert]
+        UpsertEngine --> SingleFlight[Native PostgreSQL ON CONFLICT DO UPDATE]
+        SingleFlight --> Destination[(PostgreSQL 16 quant_db)]
     end
 ```
 
@@ -35,16 +35,18 @@ graph LR
   - Extracts market session date from post title (`parser.isoparse`).
   - Matches strike price boundaries using `re.compile(r'^\s*(\d{2,6}(?:\.\d+)?)(?:\s*-\s*(\d{2,6}(?:\.\d+)?))?\s*(.*)')`.
   - Normalizes single price points (e.g. `5800 Bounce`) to `PRICE_LOW=5800.0`, `PRICE_HIGH=5800.0`.
-* **Target Table:** `QUANT_LVL_DATA_TE`
+* **Database Ingestion:** Native PostgreSQL upsert via `common_lib.connectors.postgres.insert_into_table` with `write_mode="upsert"` / `"overwrite"` and primary keys `["datetime", "ticker", "start_lvl_price"]`.
+* **Target Table:** `quant_lvl_data_te` on PostgreSQL 16 `quant_db` (Port 5435).
 
 ---
 
 ### 2.2 `ibkr-historical-data-pipeline`
-* **Source:** Interactive Brokers Gateway (`ib_insync` socket connection on port 4002).
+* **Source:** Interactive Brokers Gateway (`ib_insync` socket connection on port 4002 / 4004).
 * **Supported Contracts:** Stocks (STK), Indices (IND), Futures (FUT), Options (OPT).
 * **Parameters:** `symbol`, `barSizeSetting` (`1 min`, `5 mins`, `1 hour`, `1 day`), `durationStr` (`1 D`, `1 M`, `1 Y`), `whatToShow` (`TRADES`, `MIDPOINT`, `BID_ASK`).
 * **Connection Lifecycle:** Dynamic client ID allocation (`random.randint(100, 9999)`), and strict `try...finally: ib.disconnect()` socket safety.
-* **Target Table:** `TICKER_DATA_IBKR`
+* **Database Ingestion:** Native PostgreSQL upsert via `common_lib.connectors.postgres.insert_into_table` with primary keys `["symbol", "datetime", "barsize"]`.
+* **Target Table:** `ibkr_historical_te` on PostgreSQL 16 `quant_db` (Port 5435).
 
 ---
 
