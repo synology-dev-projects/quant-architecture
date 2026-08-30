@@ -34,6 +34,7 @@ LOW/MED IMPACT│  [P3] Quant Level PDF Parser   │  [P2] Prometheus Metrics
 ---
 
 ## 📦 Completed & Merged Milestones (Moved to completed_archive/)
+* ✅ **Cockpit Real Data Ingestion, Permanent Gaussian Clone Purge & Global 401 Lock Screen Gate (`BUG-COCKPIT-01` / `AUTH-01` / `v1.0.4`)** (Released August 2026)
 * ✅ **Universal Schema Auto-Migration Engine with Declarative PostgreSQL 16 DDL (`DB-01` / `ensure_all_schemas`)** (Released August 2026)
 * ✅ **Automated UI & Layout Geometry Verification Engine & Headless CSS Cascade Prober (`UI-01` / `audit_layout.js`)** (Released August 2026)
 * ✅ **Consolidated 4-Stage Fail-Fast CI/CD Pipeline, Master Agent Test Runner CLI & Workspace-Wide Pre-Commit Standardization (`CICD-01` / `TEST-01`)** (Released August 2026)
