@@ -281,10 +281,11 @@ sequenceDiagram
 
 ## 4. Model Context Protocol (MCP) Server Specifications
 
-The Gateway exposes standard Model Context Protocol (MCP) transports for autonomous agents:
+The Gateway exposes standard Model Context Protocol (MCP) Universal Dual-Transport endpoints for autonomous agents, supporting both modern Streamable HTTP direct JSON-RPC POST and legacy Server-Sent Events (SSE):
 
-* **SSE Transport Endpoint:** `GET /mcp/sse`
-* **Message Ingestion Endpoint:** `POST /mcp/messages?session_id=<UUID>`
+* **Dual-Transport SSE Endpoints:** `GET /mcp/sse`, `GET /sse` (Initiates SSE stream) & `POST /mcp/sse`, `POST /sse` (Direct JSON-RPC)
+* **Message & Root Endpoints:** `POST /mcp/messages`, `POST /messages`, `POST /mcp` (Direct JSON-RPC & Session Queues)
+* **Service Discovery:** `GET /mcp`, `GET /mcp/messages`, `GET /messages` (Returns server info & protocol version `2024-11-05`)
 
 ### Implemented MCP Tools & Agent Tool Registry:
 1. **`get_gexdex(ticker: str)`**: Retrieves real-time Call/Put Walls, Net Gamma, Net Delta, Gamma Flip level, and institutional dealer regime. Single-flight comma-separated batching (`META,AAPL,...`) supported.
