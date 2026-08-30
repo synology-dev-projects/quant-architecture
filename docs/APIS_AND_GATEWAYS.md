@@ -247,6 +247,36 @@ sequenceDiagram
   }
   ```
 
+### 3.4 Quant Levels Status & Ingestion Endpoints (`/api/quant-levels/*`)
+
+#### 1. Quant Levels Freshness Status (`GET /api/quant-levels/status`)
+* **Auth:** None (Public)
+* **Purpose:** Evaluates `quant_lvl_data_te` against Eastern Time 6:30 AM market cutoff and Friday weekend resolution.
+* **Response (`200 OK`):**
+  ```json
+  {
+    "status": "synced",
+    "is_fresh": true,
+    "latest_record_date": "2026-08-28",
+    "expected_date": "2026-08-28",
+    "total_records": 2800,
+    "expected_day_records": 1,
+    "message": "Quant levels are up to date (Session: 2026-08-28)."
+  }
+  ```
+
+#### 2. Manual Quant Levels Sync (`POST /api/quant-levels/sync`)
+* **Auth:** `Authorization: Bearer <SESSION_TOKEN>` (Protected)
+* **Purpose:** Triggers `common_lib.quant_levels.runner.run_daily_incremental()` to scrape and load the latest price levels into PostgreSQL.
+* **Response (`200 OK`):**
+  ```json
+  {
+    "status": "ok",
+    "message": "Quant Levels sync completed successfully. Ingested 10 records.",
+    "rows_upserted": 10
+  }
+  ```
+
 ---
 
 ## 4. Model Context Protocol (MCP) Server Specifications

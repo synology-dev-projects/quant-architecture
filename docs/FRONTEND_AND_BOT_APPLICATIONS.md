@@ -163,3 +163,17 @@ sequenceDiagram
 2. **Message Chunking:** Splits long analyses into $\le 1900$-character batches to prevent Discord HTTP 400 crashes.
 3. **Safe Error Masking:** Catches exceptions and outputs user-friendly notices without leaking internal server IPs or database connection strings.
 
+---
+
+## 3. Settings Modal & Database Synchronization (`SETTINGS-04` through `SETTINGS-06`)
+
+### 3.1 Architecture & Ergonomics
+The Settings Modal provides single-point management for application configuration, active session authentication, automated cache upgrades, and database synchronization:
+
+- **Centralized Single Source of Truth (`version.json`):** Canonical version registry (`v1.0.2`) synchronized across Gateway (`APP_VERSION`), Frontend JS (`CLIENT_VERSION`), Service Worker (`CACHE_NAME`), and HTML asset queries.
+- **Automated Version Bumper (`scripts/bump_version.py`):** Atomic patch bumper and parity verification utility (`--check`).
+- **Dynamic Environment Badging:** Automatically identifies environment via port and hostname, rendering `v1.0.2 (Staging)` on port 8096 and `v1.0.2 (Production)` on port 8095.
+- **Options Flow Freshness Indicator & In-Process Sync (`/api/flow/*`):** Checks latest trade date against expected market session and executes in-process ingestion with atomic cache invalidation.
+- **Quant Levels Freshness Indicator & In-Process Sync (`/api/quant-levels/*`):** Evaluates `quant_lvl_data_te` against Eastern Time 6:30 AM cutoff and weekend Friday resolution, executing in-process web scraping and upserts on demand.
+- **Full-Width Accessible Layout:** Full-width centered flexbox containers with minimum 44px WCAG tap targets on all action buttons.
+
