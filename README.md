@@ -67,4 +67,4 @@ The platform is built, maintained, and verified by an autonomous, multi-agent en
 * 🛡️ **Adversarial Review Council:** Independent Phase 5 Reviewers (`no-mistakes-reviewer` for quality/SRE and `architecture_review_agent` for 1,000 DAU scalability) operating on strict **Zero Unacknowledged Findings** governance.
 * 🚦 **Human-in-the-Loop Gates:** 4 hard stop gates ensuring zero unreviewed code changes and zero unapproved production merges.
 
-👉 **Read the Complete Operations Manual:** **[`.agents/README.md`](../.agents/README.md)** (Architecture, 4-tier memory hierarchy, lifecycle state machines, and human approval gates).
+👉 **Read the Complete Operations Manual:** **[`.agents/README.md`](.agents/README.md)** (Architecture, 4-tier memory hierarchy, lifecycle state machines, and human approval gates).
