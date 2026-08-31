@@ -1,4 +1,4 @@
-﻿# 🏛️ quant-architecture
+# 🏛️ quant-architecture
 
 > **Repository Standard:** Single Source of Truth for Quant System Architecture, Protocols, Specifications, and Living Documentation.  
 > **Hard Rule:** This repository contains **STRICTLY DOCUMENTATION, SCHEMAS, RULES, AND RFC PLANS**. It contains **ZERO EXECUTABLE APPLICATION CODE**.
@@ -55,3 +55,16 @@ quant-architecture/
 | 🔴 **P1** | PIPE-01 | ibkr-historical-data-pipeline | **[IBKR Socket Lifecycle Context Manager](implementation_plans/p1_high_impact_resilience/P1_IBKR_ASYNC_SOCKET_LIFECYCLE.md)** | **HIGH** (Production Reliability) |
 | 🟠 **P2** | OBSV-01 | gexdex-api & gateway | **[Prometheus Exporter & JSON Logs](implementation_plans/p2_medium_impact_observability/P2_CENTRALIZED_LOGGING_METRICS.md)** | **MEDIUM** (Observability) |
 | 🟡 **P3** | PIPE-02 | quant-level-pipeline | **[PDF Attachment Morning Report Parser](implementation_plans/p3_low_medium_ingestion/P3_QUANT_LEVEL_PDF_PARSER.md)** | **LOW-MED** (Extensibility) |
+
+---
+
+## 🤖 Autonomous Multi-Agent Engineering Architecture
+
+The platform is built, maintained, and verified by an autonomous, multi-agent engineering fleet operating at **L8 Autonomous Engineering Maturity**:
+
+* 🧭 **Captain Orchestrator:** Master state machine coordinating triage, fleet dispatch, and deployment.
+* 👥 **Execution Fleet (The Crew):** Specialized Builder subagents (`backend_agent`, `frontend_agent`, `devops_agent`) implementing features with local in-situ test enforcement.
+* 🛡️ **Adversarial Review Council:** Independent Phase 5 Reviewers (`no-mistakes-reviewer` for quality/SRE and `architecture_review_agent` for 1,000 DAU scalability) operating on strict **Zero Unacknowledged Findings** governance.
+* 🚦 **Human-in-the-Loop Gates:** 4 hard stop gates ensuring zero unreviewed code changes and zero unapproved production merges.
+
+👉 **Read the Complete Operations Manual:** **[`.agents/README.md`](../.agents/README.md)** (Architecture, 4-tier memory hierarchy, lifecycle state machines, and human approval gates).

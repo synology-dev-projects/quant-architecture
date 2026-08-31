@@ -4,7 +4,46 @@ trigger: always_on
 
 # 🚀 Feature Development Protocol (L8 Standard)
 
-When developing new features, integrations, or capabilities across the Quant System, all agents MUST follow this 6-phase engineering lifecycle:
+## 0. Mandatory Intake Triage & Dedicated Requirements Architect Gate
+
+Whenever a user requests work, the workflow **MUST START with an interactive triage interview**:
+
+### 1. Mandatory Initial 3-Choice Triage Question (via `ask_question`)
+The agent must immediately ask the user:
+> **"What are you trying to create?"**
+> 1. **A new data model**
+> 2. **A new feature to an existing data model**
+> 3. **A fix / bug / optimization of an existing data model**
+
+### 2. Dedicated Subagent Spin-Up: `requirements_architect_agent`
+A specialized **Requirements & Architecture Intake Agent** (`requirements_architect_agent`) is spun up to conduct the deep-dive Grill-Me interview based on the selected branch:
+
+* **Branch A: New Data Model Workflow:**
+  * **Source Schema Question (Exclusive to Branch A):** The agent explicitly asks if source system schemas/folder paths exist.
+  * **Folder Path Schema Auto-Scanner:** If a folder path is provided, the agent automatically scans the folder recursively across all file types (`.sql`, `.json`, `.csv`, `.py`, `.ts`, `.prisma`, `.yaml`, `.yml`) to extract all confirmed source tables, columns, and datatypes.
+  * **Mockup Mode & AI-Generated Tagging:** If no folder or source schemas are provided, the session is treated as a **Conceptual Mockup**, and every inferred column MUST be tagged as `[AI-GENERATED]`.
+  * Grills the user iteratively across domain entities, grain, tracked attributes, temporal requirements (SCD1 / SCD2 / Bi-temporal), and volume.
+* **Branch B: New Feature to Existing Data Model:**
+  * Asks which existing model to modify (`dim_employee_core_scd2`, `fact_hr_monthly_snapshot`, etc.).
+  * **Folder as New Tables Invariant (HARD RULE):** If a folder path is provided in this branch, it is automatically assumed that all schemas/tables found inside that folder are **NEW tables / extension entities to be added and integrated into the existing data model**.
+  * Grills the user on new columns, foreign key linkages to the existing model, state transition triggers, and backward compatibility.
+* **Branch C: Fix / Bug / Optimization:**
+  * Grills the user on expected vs. actual behavior, reproduction scenarios, root cause analysis, performance bottlenecks, and the rationale for the fix until fully aligned.
+
+### 3. Implementation Plan Creation & Amendment Loop
+* The `requirements_architect_agent` produces or updates the `implementation_plan.md` artifact.
+* The agent listens to user feedback and makes any necessary amendments to the plan.
+
+### 4. Handoff to the Captain (Parent Orchestrator)
+* Once the user explicitly reviews and approves the implementation plan (`"approved"` / `"proceed"`), the plan is **handed off to the Captain**.
+* The Captain then presents the Complexity Benchmark & Fleet Recommendation and dispatches the execution fleet.
+
+### 5. Universal Reviewer Applicability (HARD MANDATE)
+* **The Phase 5 Reviewer & Phase 5c Architect Acknowledgment Gate applies UNCONDITIONALLY to ALL 3 WORKFLOWS:**
+  1. **New Data Model Workflow**
+  2. **Data Model New Feature Workflow**
+  3. **Data Model Fix / Bug / Optimization Workflow**
+* Zero data model changes (whether a brand-new model, a 1-column feature addition, or a 1-line index bug fix) may ever bypass Phase 5 Reviewers or Phase 5c Architect Acknowledgment. Zero exceptions.
 
 ---
 
@@ -12,27 +51,33 @@ When developing new features, integrations, or capabilities across the Quant Sys
 
 ```mermaid
 graph TD
-    A[Phase 1: Architecture RFC / Plan] -->|User Approves| B[Phase 2: Worktree & Dependency Sequencing]
-    B --> C[Phase 3: Implementation & Strict YAGNI]
-    C --> D[Phase 4: Local In-Situ Test Gate ./verify.sh]
-    D --> E[Phase 5: No-Mistakes Multi-Agent Review]
-    E -->|Approved| F[Phase 6: PR Summary & Walkthrough]
+    Triage["0. Initial Triage Question (ask_question)"] --> ReqAgent["0a. Spin-up Requirements Architect Agent"]
+    ReqAgent --> Grill["0b. Deep-Dive Grill-Me Interview"]
+    Grill --> Plan["1. Draft implementation_plan.md + Amendments"]
+    Plan -->|User Approves| Handoff["1a. Handoff to Captain Orchestrator"]
+    Handoff --> Fleet["2. Multi-Agent Fleet Dispatch (backend / frontend / devops)"]
+    Fleet --> Build["3. Implementation & Strict YAGNI"]
+    Build --> Test["4. Local In-Situ Test Gate ./verify.sh"]
+    Test --> Review["5. Adversarial Quality & Architecture Reviews"]
+    Review -->|Approved| Promote["6. Staging Deploy, DevTools MCP & Master Promotion"]
 ```
 
 ---
 
 ## 2. Detailed Phase Specifications
 
-### Phase 1: Orchestrator Ingestion, Architecture RFC & Plan
-- **Mandatory Orchestrator Entrypoint:** Every new feature, integration, or refactor MUST begin by activating the `orchestrator` agent. The Orchestrator manages the active backlog (`00_ACTIVE_BACKLOG.md`), creates the implementation plan, coordinates worker subagents, and enforces all testing gates.
-- Never write source code from an initial prompt. Always create `implementation_plans/<feature_name>.md`.
+### Phase 1: Architecture RFC & Implementation Plan
+- Never write source code from an initial prompt. Always create `implementation_plans/<feature_name>.md` or `implementation_plan.md`.
 - **Mandatory Plan Structure:**
   1. **Architecture & Design Decisions:** Explain technical trade-offs, schemas, and API contracts.
   2. **User Review Required:** Highlight any breaking changes or design choices using GitHub alerts.
   3. **Open Questions:** Surface any ambiguities before proceeding.
   4. **Component Breakdown:** Categorize files logically with `[NEW]`, `[MODIFY]`, or `[DELETE]` annotations.
   5. **Verification Plan:** Define automated test commands (`pytest`, `./verify.sh`) and manual validation steps.
-- **Approval Gate:** STOP and wait for the human Engineering Director's explicit approval before proceeding.
+- **Mandatory Approval Gate (HARD RULE):** STOP and wait for the human Engineering Director's explicit approval before touching ANY source code files or making any edits. Zero code changes are allowed before prior plan approval.
+- **Mandatory Multi-Agent Workflow Selection & Benchmark Gate (HARD RULE):** Whenever the user approves an implementation plan, the agent **MUST provide a brief Complexity Benchmark (estimated diff size, subsystems affected, blast radius risk, and recommended fleet)** and explicitly ask the user which multi-agent workflow to use, waiting for the user's selection before proceeding to Phase 2/3.
+- **Mandatory Chrome DevTools UI Verification Gate (HARD RULE):** Whenever the frontend UI (HTML, CSS, JavaScript, views, modals, PWA) is modified or created, the agent **MUST use Chrome DevTools MCP tools** (`navigate_page`, `take_screenshot`, `evaluate_script`, `click`, etc.) to visually and functionally test and verify the live UI in a real browser session across ALL workflows.
+- **Mandatory Staging Approval Gate Before Master Promotion (HARD RULE):** NEVER merge or push code to `master` (Production) directly or automatically. All changes MUST be deployed to `develop2` (Staging, port `8096`), verified live, and presented to the user. Promotion to `master` strictly requires the user's explicit approval. Zero exceptions.
 
 ### Phase 2: Dependency Sequencing & Worktree Isolation
 - Always sequence cross-repo development in correct architectural order:
@@ -42,106 +87,54 @@ graph TD
   4. `quant-pwa` / `discord-quant-bot` (Clients & UI)
 - Isolate execution to the active feature branch on `develop2` (or dedicated worktree).
 
-### Phase 3: Orchestrator Crew Dispatch & Parallel Implementation (Strict YAGNI)
-- **Automatic Subagent Delegation:** As soon as Phase 1 is approved, the `orchestrator` MUST automatically dispatch specialized worker Subagents (`backend_agent`, `frontend_agent`, `pipeline_agent`) concurrently.
-- **Supervision & Termination:** The `orchestrator` monitors running agents, sends corrective guidance, and can stop/kill agents (`manage_subagents`) if regressions or architectural violations occur.
+### Phase 3: Implementation & Anti-Bloat (Strict YAGNI)
 - **Smallest Viable Diff:** Implement ONLY the capabilities approved in Phase 1.
 - **Strict Typing:** All data models must use Pydantic models (Python) or explicit interfaces (TypeScript).
 - **Configuration Hygiene:** Read all parameters from `MainConfig` or environment variables; never hardcode credentials, ports, or URLs.
 - **Failure Resilience:** Wrap network operations in exponential backoff retries and explicit timeouts.
 
-### Phase 4: Local In-Situ Verification & Vertical Testing Gate
-- Write comprehensive unit tests in `tests/` covering both happy paths and negative edge cases.
-- Execute local `./verify.sh` or `pytest` in the workspace to confirm unit tests pass with `exit code 0` in <5 seconds.
-- **Mandatory Vertical Testing Agent Gate (`vertical_test_agent`):** In addition to unit tests, the `orchestrator` MUST dispatch `vertical_test_agent` to exercise the full 6-layer in-situ vertical slice (Extract ➔ Transform ➔ Postgres Upsert & Idempotency ➔ Connector Read ➔ Gateway Tool ➔ SSE Stream). Any integration break halts progress and triggers `triage_and_fix_agent` before Phase 5 code reviews.
-- **Mandatory Local Docker Container Verification:** For any changes involving dependencies (`requirements.txt`), services, environment variables, or file system volume mounts (`common_config`, `common_lib`), agents MUST build and run the local Docker Compose stack (`docker compose up --build -d`) to verify container mounts, dependencies, and network connections function identically in Docker before pushing to staging.
+### Phase 4: Shared Testing Block (Local In-Situ Verification Gate)
+- Write comprehensive acceptance unit and integration tests in `tests/` covering both happy paths and negative edge cases.
+- Execute the universal `./verify.sh` or `pytest` suite in the workspace to confirm:
+  - Static typechecks pass with 0 errors.
+  - All unit tests pass with `exit code 0` in <5 seconds (zero collateral regressions).
+  - Zero database mutations occur against production tables.
 
-### Phase 5a: "No-Mistakes" Quality Review Gate
-- Run the `no-mistakes-reviewer` subagent on the git diff to audit:
-  - 🔒 **Security:** Authentication, CORS, secret management, injection vectors.
-  - 🔄 **Concurrency:** Connection pooling, thread safety, graceful teardown.
-  - 🧮 **Precision:** Financial calculations, float math, datetime handling.
-  - 🧪 **Tests:** Test isolation and coverage.
-- If the reviewer returns 🔴 Blockers, the agent must self-heal and re-verify before proceeding.
+### Phase 5: Multi-Agent Review Fleet & Mandatory Architect Sign-Off Gate
 
-### Phase 5b: Enterprise Architecture Review Gate (1,000 DAU Baseline)
-- Run the `architecture_review_agent` (Enterprise Principal Systems Architect) to evaluate:
-  1. **Scalability:** Bottlenecks, stateful traps, and concurrency locks calibrated for 1,000 DAU.
-  2. **Maintainability:** Domain decoupling, schema contract stability, and distributed tracing.
-  3. **Cost Optimization:** Compute idle capacity, token waste, and egress efficiency.
-  4. **Expandability:** Contract stability for adding future microservices and endpoints.
-  5. **Anti-Bloat (Zero-Bloat Mandate):** Eliminate redundant hops, resume-driven abstractions, and unnecessary complexity.
-- Reviewer outputs the **Enterprise Scorecard**, **Mandatory Engineering Fixes**, and **Target Lean Architecture**.
+#### 1. Reviewer Presentation Standard (Phase 5a & 5b)
+Every reviewer (`research` Quality Reviewer, `architecture_review_agent`, etc.) MUST format every finding using this **3-Point Standard**:
+1. **The Finding:** Clear technical/model description of the issue or risk.
+2. **Reasoning & Business/System Impact:** Deep explanation of why this is a defect and what happens if left unfixed (e.g. *"Double-counts shipping fees by 400% in lineitem reports"*).
+#### 2. The Core 4 Pure Data Model Design Risk Reviewers (Phase 5)
+Every data model is reviewed strictly across the **4 Pure Design Risk Specializations**:
 
-### Phase 6: Staging Dual-Gate Validation, PR Merge & Production Promotion
-- **Strict Full Dev Cycle for All Fixes (Rule 1):** Every new feature, bug fix, and refactor MUST follow the full lifecycle: `Local Test (Host + Docker + vertical_test_agent)` ➔ `develop2 (Staging Deploy & Hardware Live Verification :8096)` ➔ `master (Production Promotion :8095)`. Never fast-track or push fixes directly to `master`.
-- **Phase 6a: Mandatory Dual Staging Validation Gates (Synology NAS :8096):**
-  Following deployment of `develop2` to the staging container (`:8096`), the Orchestrator MUST dispatch two staging verification agents:
-  1. **🧪 `vertical_test_agent` (Backend/Pipeline/SSE Gate):** Executes the full 6-layer in-situ vertical test suite against the live staging container (`:8096`), verifying database persistence, connector reads, and SSE streaming token latency.
-  2. **🖥️ `staging_devtools_agent` (Real-Browser & Visual UI Gate):** Launches headless Chromium via Chrome DevTools MCP against `http://192.168.1.68:8096`. Authenticates, executes user flows (Chatbot, Cockpit search, Flow table sorting, GEX/DEX toggle), audits console/network logs for zero errors, asserts non-zero DOM/Canvas values (`spot > 0`, `strikes.length > 0`), and captures full-page visual screenshot proof (`take_screenshot`).
-- **Phase 6b: PR Creation & Master Promotion (Production :8095):**
-  Only after BOTH `vertical_test_agent` and `staging_devtools_agent` return `PASSED` reports on `:8096` is the PR to `master` approved and merged.
-- **Zero Direct Local Push to Master (Rule 3 - Hard Invariant):** Under NO circumstances is direct local pushing to `master` allowed. `master` can ONLY be updated via merge from `develop`/`develop2` after staging verification.
-- **Produce Walkthrough Document:** Detail changes, staging DevTools screenshot proofs, hardware verification results, and key decisions made.
-- **Mandatory Local Server Teardown:** Whenever local testing completes and changes are pushed to `develop`/`develop2` or `master`, agents MUST automatically terminate all local background testing processes (`uvicorn`, `http.server`, Chrome instances) to release local ports (`3000`, `8000`) and conserve PC memory.
-- **Mandatory Living Documentation Sync (Production-Only Hard Rule):** The `quant-architecture` repository is **ONLY updated and pushed when code is promoted to Production (`master` / `prod`)**. During staging/develop testing, `quant-architecture` remains frozen. Upon promotion/merging to `master`, agents MUST automatically update all corresponding design and architecture documents in `docs/` (`ARCHITECTURE_OVERVIEW.md`, `DATABASE_AND_DATA_MODELS.md`, `ETL_PIPELINES_AND_INGESTION.md`, `APIS_AND_GATEWAYS.md`, `FRONTEND_AND_BOT_APPLICATIONS.md`, `INFRASTRUCTURE_AND_CICD.md`), update `implementation_plans/00_ACTIVE_BACKLOG.md`, and commit/push `quant-architecture` to `origin master`. Outdated architecture documentation is treated as a critical system defect.
+1. **🧮 Financial & Grain Integrity Risk:** Audits grain declared vs. primary keys, prevents metric multiplication / double-counting on line-item tables, validates additive vs. semi-additive metrics, and enforces `DECIMAL/NUMERIC` precision.
+2. **⏳ Temporal & Historical Time-Travel Risk:** Audits SCD Type 1 vs. SCD Type 2 strategies, ensures `[valid_from, valid_to)` intervals never overlap, validates retroactive backdating handling, and guarantees historical reports remain 100% accurate.
+3. **🧩 Relational Integrity & Entity Decoupling Risk:** Prevents entity collisions (70-column monolithic traps), enforces proper decoupling of 1:1, 1:N, and N:M relationships with bridge tables, and eliminates Codd's update/delete anomalies.
+4. **🧱 Refactorability & Data Mart Sprouting Risk:** Audits schema evolution backward compatibility, ensures conformed dimensions, and guarantees the model is ready for downstream teams to sprout their own specialized Data Marts without breaking the core.
+
+#### 3. Mandatory Reviewer Presentation Standard
+Every reviewer finding MUST follow the **3-Point Standard**:
+1. **The Finding:** Clear technical description of the model or schema risk.
+2. **Reasoning & Business Impact:** What goes wrong if ignored (e.g. *"Double-counts shipping revenue by 400%"* or *"Spawns 1,000% row explosion on monthly changes"*).
+3. **Actionable Recommendation:** Concrete SQL / ERD modification to fix it.
+
+#### 4. Phase 5c: Mandatory Architect Review & Acknowledgment Gate (HARD RULE)
+- **Zero Unacknowledged Findings Rule:** Every finding presented by the Reviewers MUST be reviewed and formally acknowledged by the Architect (`data_model_architect_agent` / Lead Architect).
+- The Architect must publish a **Formal Review Disposition Matrix**:
+  * `[ACCEPTED & REMEDIATED]`: Architect updates schema/SQL, re-runs validation, and resolves the issue.
+  * `[ACCEPTED AS TRADE-OFF]`: Architect provides formal architectural rationale for why it is acceptable for this scope.
+  * `[REJECTED WITH PROOF]`: Architect provides mathematical/relational proof showing why the reviewer's concern is already satisfied.
+- **Zero findings may be silently ignored or bypassed.** Approval is strictly blocked until 100% of findings have a documented disposition.
 
 ---
 
-## 3. 🚨 CI/CD Staging Failure & Bug Remediation Protocol
-
-When a staging deployment to `develop2` fails during GitHub Actions execution or an integration bug is detected:
-
-```mermaid
-flowchart TD
-    Push[Push to develop2] --> CI[GitHub Actions Runner]
-    CI -->|Exit Code != 0: FAILED| Halt[🛑 Fail-Stop & Dispatch triage_and_fix_agent]
-    Halt --> Triage[📊 Automated 4-Tier Failure Triage]
-    
-    subgraph RCA [Failure Classification]
-        Triage --> T1[Type A: Docker / Build / Packaging]
-        Triage --> T2[Type B: Secrets / Env Var Drift]
-        Triage --> T3[Type C: Synology NAS Host / Daemon]
-        Triage --> T4[Type D: Pre-Deploy Test Regression]
-    end
-    
-    T1 --> LocalDocker[Mandatory Local Docker Container Reproduction]
-    T2 --> LocalDocker
-    T4 --> LocalDocker
-    
-    T3 --> SSHRestart[Attempt SSH Host Restart / Container Prune]
-    SSHRestart --> ReDeploy[Re-Trigger CI/CD on develop2]
-    
-    LocalDocker --> Patch[Smallest Viable Diff & Verify]
-    Patch --> Commit[Commit to develop2: fix conventional tag]
-    Commit --> ReDeploy
-    
-    ReDeploy --> CircuitBreaker{Attempts < 3?}
-    CircuitBreaker -->|Yes| CheckResult[Monitor CI/CD]
-    CircuitBreaker -->|No: Exceeded 3| Escalate[🛑 Fail-Stop & Escalate Structured RCA]
-```
-
-### Step 1: Dispatch `triage_and_fix_agent` & Ingest Logs
-- When `gh run watch` reports `failure` or `cancelled`:
-  - **HARD STOP:** Never attempt to bypass staging or promote to `master`.
-  - The Orchestrator automatically dispatches `triage_and_fix_agent` with full log traces from `gh run view <run_id> --log-failed`.
-
-### Step 2: Automated Failure Classification
-Classify the error into one of 4 archetypes:
-1. **Type A (Docker / Build Failure):** Missing Linux system package, Dockerfile instruction error, wheel build failure in `requirements.txt`.
-2. **Type B (Config & Secrets Drift):** Missing environment variable in `.env.template` or GitHub Actions secret mapping.
-3. **Type C (Synology NAS Host Collision / Infrastructure):** Port 8096 in use, container name collision, Docker daemon storage exhaustion, or SSH drop.
-4. **Type D (Pre-Deploy Test Regression):** Automated test failure executing inside the GitHub Actions runner.
-
-### Step 3: Local Docker Reproduction (Mandatory Gate)
-- For Type A, B, and D errors, `triage_and_fix_agent` MUST reproduce and verify the fix locally inside Docker (`docker compose up --build -d`) before pushing. Speculative untested pushes are strictly prohibited.
-
-### Step 4: Infrastructure Self-Healing (SSH Restart)
-- For Type C (Host / Infrastructure) errors on the Synology NAS, `triage_and_fix_agent` attempts an SSH restart/cleanup of hanging Docker containers on the NAS host before escalating.
-
-### Step 5: Direct `develop2` Commit & Master Regression Gate
-- Commit the fix directly to `develop2` using conventional tags: `fix(cicd): ...`, `fix(gateway): ...`, `fix(docker): ...`.
-- **Master Regression Gate (Rule 1):** If a bug occurs while verifying the `master` (Production) branch, the fix MUST STILL go through `develop2`, pass staging verification on port `8096`, and be promoted to `master` via PR. Never patch `master` directly.
-
-### Step 6: 3-Attempt Circuit Breaker
-- Up to 3 autonomous fix-and-deploy attempts are permitted per incident. If the 3rd attempt fails on the same root cause, the agent halts immediately and presents a structured RCA report to the human Engineering Director.
+### Phase 6: PR Summary, Staging Validation & Living Documentation
+- Produce a clean, concise PR summary document or walkthrough detailing:
+  - What was built and why.
+  - Verification results and test output.
+  - Key decisions made.
+- Deploy to staging develop container for human-in-the-loop validation.
+- **Mandatory Local Server Teardown:** Whenever local testing completes and changes are pushed to `develop`/`develop2` or `master`, agents MUST automatically terminate all local background testing processes (`uvicorn`, `http.server`, Chrome instances) to release local ports (`3000`, `8000`) and conserve PC memory.
+- **Mandatory Living Documentation Sync:** Upon promotion/merging to `master`, automatically update all corresponding design and architecture documents in `docs/` (`ARCHITECTURE_OVERVIEW.md`, `DATABASE_AND_DATA_MODELS.md`, `ETL_PIPELINES_AND_INGESTION.md`, `APIS_AND_GATEWAYS.md`, `FRONTEND_AND_BOT_APPLICATIONS.md`, `INFRASTRUCTURE_AND_CICD.md`). Outdated architecture documentation is treated as a critical system defect.
