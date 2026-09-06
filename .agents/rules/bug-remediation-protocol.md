@@ -62,3 +62,26 @@ graph TD
   1. Dispatch `vertical_test_agent` against the live staging container (`:8096`) to verify the 6-layer pipeline and SSE stream.
   2. Dispatch `staging_devtools_agent` via Chrome DevTools MCP against `http://192.168.1.68:8096` to execute real-browser UI regression tests, audit console logs, verify non-zero DOM/Canvas geometry, and capture visual screenshot proof.
 - Upon 100% green staging verification, promote/merge PR to `master` (Production `:8095`), move the task from `00_ACTIVE_BACKLOG.md` to `completed_archive/`, and synchronize living documentation in `docs/`.
+
+---
+
+## 3. Staging Defect Intercept Pattern (In-Situ Branching)
+
+When testing an active feature workflow on **Staging (`:8096`)** or at the **Production Gate**, any defect or unexpected behavior discovered in-situ MUST be intercepted via a nested remediation loop:
+
+1. **Spawn Nested Defect**:
+   ```bash
+   python scripts/protocol_graph.py staging-bug --name "<defect-description>"
+   ```
+   * The parent feature workflow is immediately suspended at its current node.
+   * Production promotion (`prod-authorize`) is strictly locked and prohibited.
+2. **Execute Mandatory RED $\rightarrow$ GREEN Remediation**:
+   * Write reproduction test (`tests/test_reproduce_<issue>.js` or `.py`).
+   * Verify failure: `python scripts/protocol_graph.py red --test <path>`.
+   * Apply smallest viable diff.
+   * Verify pass: `python scripts/protocol_graph.py green`.
+   * Run adversarial audit: `python scripts/protocol_graph.py audit`.
+3. **Re-deploy & Verify on Staging**:
+   * Deploy fix to `develop2` staging (`:8096`).
+   * Run: `python scripts/protocol_graph.py staging-verify`.
+   * The defect workflow is marked resolved, popped from the stack, and the parent feature workflow is cleanly resumed at `PHASE_5_STAGING` for final acceptance.
