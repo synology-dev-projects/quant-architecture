@@ -16,7 +16,7 @@
 - **Severity:** 🔴 **Critical**
 - **Problem:**
   ```python
-  cmd = 'plink.exe -ssh -pw "4354GoGo!!" -batch rachardv@192.168.1.68 "echo \'4354GoGo!!\' | sudo -S /usr/local/bin/docker logs --tail 5 synology-github-runner"'
+  cmd = 'plink.exe -ssh -pw "<REDACTED_PASSWORD>" -batch rachardv@192.168.1.68 "echo \'<REDACTED_PASSWORD>\' | sudo -S /usr/local/bin/docker logs --tail 5 synology-github-runner"'
   ```
   The Synology NAS user password and sudo password are hardcoded in plain text in source control.
 - **Remediation:**
