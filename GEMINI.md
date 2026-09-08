@@ -66,11 +66,12 @@
 
 ---
 
-## 4. Master Promotion & Living Documentation Protocol
-- **Zero-Critical-Defects Policy (HARD GATE):** Under NO CIRCUMSTANCES may any code promotion, PR, or deployment proceed to staging or `master` if an unresolved 🔴 **CRITICAL** flag exists (such as plaintext secrets, unencrypted credentials, SQL injection, database concurrency collisions, silent data loss, or unauthenticated route exposure). All critical flags are non-negotiable **BLOCKERS**.
+### 4. Master Promotion & Living Documentation Protocol
+- **Zero-Critical-Defects & Reviewer Dealbreaker Policy (HARD GATE):** Under NO CIRCUMSTANCES may any code promotion, PR, or deployment proceed to staging or `master` if an unresolved 🔴 **CRITICAL** flag or architectural dealbreaker exists from **ANY** reviewer (Enterprise Systems Architect, Adversarial Quality Auditor, No-Mistakes Reviewer, Security Scanner, or In-Situ Staging Probes). All reviewer dealbreakers and critical flags are non-negotiable **BLOCKERS**.
+- **Reviewer Dealbreaker Bug Remediation Trigger (HARD INVARIANT):** Whenever ANY reviewer flags a dealbreaker or red flag during the development cycle, workflow state transitions immediately to `BLOCKED` and automatically spawns the **Bug Remediation Protocol** (via `python scripts/protocol_graph.py reviewer-dealbreaker --name <issue> --reviewer <role>`). The defect must be isolated, verified RED with a reproduction test, resolved with a minimal diff, verified GREEN, and passed through adversarial audit before the parent feature workflow can resume.
 - **Deterministic Secret Scanning Gate:** All repositories enforce automated pre-commit secret scanning via `scripts/check_secrets.py`. Prior to any release cycle completion or master promotion, agents MUST execute `python scripts/check_secrets.py --all` to guarantee zero secrets exist in tracked files.
 - **Staging Validation Gate:** All changes must be deployed and validated in the develop staging containers (`develop2` on ports `8091`/`8096`) before merging to `master`.
-- **Production-Only Architecture Sync (HARD RULE):** The `quant-architecture` repository is **ONLY updated and pushed when code is promoted to Production (`master` / `prod`)`. During everyday sandbox development and testing on `develop`/`develop2`, `quant-architecture` MUST remain frozen.
+- **Production-Only Architecture Sync (HARD RULE):** The `quant-architecture` repository is **ONLY updated and pushed when code is promoted to Production (`master` / `prod`)**. During everyday sandbox development and testing on `develop`/`develop2`, `quant-architecture` MUST remain frozen.
 - **Mandatory Living Documentation Updates:** EVERY TIME code is promoted or merged into `master`, agents MUST automatically update the architecture documentation in `docs/` (`ARCHITECTURE_OVERVIEW.md`, `DATABASE_AND_DATA_MODELS.md`, `ETL_PIPELINES_AND_INGESTION.md`, `APIS_AND_GATEWAYS.md`, `FRONTEND_AND_BOT_APPLICATIONS.md`, `INFRASTRUCTURE_AND_CICD.md`), update `implementation_plans/00_ACTIVE_BACKLOG.md`, and push `quant-architecture` to `origin master`.
 - **No Outdated Docs:** Architecture documentation must always reflect the exact code state running in production. Outdated documentation is treated as a critical defect.
 
@@ -82,7 +83,7 @@
   1. **Plan & Gate:** Create/update `implementation_plan.md` and get explicit user approval.
   2. **Crew Dispatch:** Spawn specialized crew subagents (`BackendSystemsEngineer`, `MobileFrontendEngineer`, `DataPipelineEngineer`) in parallel via `invoke_subagent`.
   3. **Local Testing:** Each crewmate must execute and pass local `pytest` suites before reporting back to `QuantFleetCommander`.
-  4. **Adversarial Audit:** `QuantFleetCommander` MUST dispatch the `AdversarialQualityAuditor` subagent to audit the combined diff against security, concurrency, math precision, and test coverage.
-  4.1. **Zero-Critical-Defects Gate:** If `AdversarialQualityAuditor` flags ANY 🔴 **CRITICAL** defect, workflow state transitions immediately to `BLOCKED`. Crew must remediate and re-verify before proceeding.
+  4. **Adversarial Audit & Architecture Review:** `QuantFleetCommander` MUST dispatch the `AdversarialQualityAuditor` and `EnterpriseArchitectureReviewer` to audit the diff against security, concurrency, math precision, test coverage, and enterprise scalability.
+  4.1. **Zero-Critical-Defects & Reviewer Dealbreaker Gate:** If ANY reviewer flags ANY 🔴 **CRITICAL** defect or architectural dealbreaker, workflow state transitions immediately to `BLOCKED`. It immediately triggers the Bug Remediation Protocol (`reviewer-dealbreaker` on the protocol graph), requiring verified RED reproduction, surgical fix, GREEN validation, and formal reviewer re-audit before proceeding.
   5. **Staging Deploy & Local Teardown:** Push to `develop2` staging containers (`8091`/`8096`) for human validation. `QuantFleetCommander` MUST immediately terminate all local background servers (`uvicorn`, `http.server`, Chrome instances) upon pushing to release local ports (3000, 8000) and free PC memory.
   6. **Master Promotion & Living Docs:** Upon user approval, promote to `master` and update `docs/` in the same commit cycle.

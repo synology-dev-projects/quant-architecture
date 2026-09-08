@@ -27,17 +27,13 @@
 3. **Ephemeral Staging Cleanup:** The CI/CD deploy script automatically tears down develop containers on master deployment, keeping RAM usage bounded.
 
 ### 🔴 Maintenance Vulnerabilities & Friction Points
-1. **Lack of Automated Schedulers & Dead-Man Switches:**
-   - Pipelines currently rely on external Synology Task Scheduler cron jobs. There is no centralized orchestration engine (like APScheduler, Airflow, or systemd timers) tracking execution states.
-   - If a cron job silently fails or misses a market close run, there is no automatic backfill trigger.
-2. **Unmonitored Third-Party HTML/Feed Scrapers:**
-   - `quant-level-pipeline` parses HTML posts from Mighty Networks. If the portal updates its CSS classes or post format, the scraper will fail silently or yield empty rows.
-3. **Missing Health Check / Watchdog Daemons:**
-   - The Gateway and Discord Bot do not currently have an external heartbeat monitor (e.g. Uptime Kuma / BetterUptime). If the Discord bot crashes or reaches a rate-limit lock, the administrator is not alerted until users report it.
+1. **Unmonitored Third-Party HTML/Feed Scrapers:**
+   - `quant-level-pipeline` parses HTML posts from Mighty Networks. If the portal updates its CSS classes or post format, the scraper will fail silently or yield empty rows without a dead-man alert.
+2. **Scheduling Architecture (Zero-Bloat Synology Task Scheduler):**
+   - Pipelines rely intentionally on native, lightweight Synology Task Scheduler cron jobs. Heavyweight external orchestration daemons (Airflow, Celery, Dagster, APScheduler supervisor daemons) are intentionally eliminated under the Zero-Bloat Mandate.
 
 ### 💡 High-ROI Maintenance Recommendations:
-* **Implement Centralized Task Schedulers:** Introduce an `APScheduler` worker daemon inside `common-lib` or a unified supervisor container.
-* **Integrate Fail-Safe Alerting:** Ensure every pipeline catches uncaught exceptions and dispatches an immediate priority 5 alert via `ntfy` with error trace snippets.
+* **Integrate Fail-Safe Alerting & Dead-Man Checks:** Ensure scrapers catch exceptions and alert via `ntfy`, with affirmative validation when expected trading-day records are missing or zero.
 
 ---
 

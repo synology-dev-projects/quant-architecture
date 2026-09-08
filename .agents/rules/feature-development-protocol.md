@@ -128,6 +128,16 @@ Every reviewer finding MUST follow the **3-Point Standard**:
   * `[REJECTED WITH PROOF]`: Architect provides mathematical/relational proof showing why the reviewer's concern is already satisfied.
 - **Zero findings may be silently ignored or bypassed.** Approval is strictly blocked until 100% of findings have a documented disposition.
 
+#### 5. Phase 5d: Universal Reviewer Dealbreaker & Bug Remediation Protocol Gate (HARD INVARIANT)
+- **Reviewer Dealbreaker Rule:** Any 🔴 **CRITICAL** defect, architectural red flag, or dealbreaker finding from ANY reviewer (Quality Reviewer, Enterprise Systems Architect, Adversarial Auditor, Security Gate) is an absolute, non-negotiable **BLOCKER**.
+- **Automatic Bug Remediation Trigger:** A reviewer dealbreaker immediately transitions workflow state to `BLOCKED` and spawns the **Bug Remediation Protocol** via `python scripts/protocol_graph.py reviewer-dealbreaker --name <issue> --reviewer <role>`.
+- The defect must follow the rigorous TDD loop:
+  1. Write an in-situ / automated reproduction test (`tests/test_reproduce_<issue>.py`) verifying the failing condition (`RED` gate).
+  2. Implement the smallest viable fix under strict YAGNI.
+  3. Verify the reproduction test passes (`GREEN` gate) with zero collateral regressions.
+  4. Pass adversarial audit and obtain formal reviewer sign-off before the parent feature workflow can be resumed.
+
+
 ---
 
 ### Phase 6: PR Summary, Staging Validation & Living Documentation
