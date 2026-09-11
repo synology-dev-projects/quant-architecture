@@ -94,8 +94,25 @@ graph LR
 
 ---
 
+### 2.5 `gexdex-snapshot-pipeline`
+* **Source:** TradingEdge DEX/GEX option models filtered by upstream institutional option flow watchlist.
+* **Frequency:** Daily incremental cron at **Market Open (09:15 ET)** based on the **last completed market session data** (`get_last_market_day`).
+* **Execution:**
+  - Automated trigger via Synology Task Scheduler (`09:15 ET`).
+  - Evaluates against `get_last_market_day()` (rolls back across weekends and NYSE market holidays).
+  - Verifies presence of institutional sweeps in `unusual_option_flow_te` for target session before computing scorecard snapshots.
+  - Commits atomic upserts into PostgreSQL fact table `gexdex_snapshot`.
+* **Target Table:** `gexdex_snapshot` on PostgreSQL 16 `quant_db` (Port 5435).
+
+---
+
 ## 3. Resilience, Schedulers & Alerts
 
-1. **Failure Notification (`ntfy.py`):** Fatal exceptions trigger HTTP POST push notifications with priority 5 to `https://richntfynotifier.synology.me/alerts`.
-2. **Weekend & Holiday Invariance:** When scrapers execute on non-trading days and detect 0 new records, they log an informational event and terminate with `exit code 0` to prevent false positive CI/CD alerts.
-3. **In-Situ Vertical Testing:** All pipeline updates require `verify_vertical.py` execution prior to merge, enforcing 100% test coverage across live extraction, transformation, database upsert, read paths, and client DOM table rendering.
+1. **Daily Cycle Orchestrator (`scripts/run_daily_cycle.py`):**
+   - Scheduled at **09:15 ET** (Market Open) via Synology Task Scheduler.
+   - Evaluates the last completed trade day (`get_default_session_date` -> `get_last_market_day`).
+   - Executes topological DAG sequence: `unusual_option_flow` -> `gexdex_snapshot` -> `market_confluence`.
+2. **Failure Notification (`ntfy.py`):** Fatal exceptions trigger HTTP POST push notifications with priority 5 to `https://richntfynotifier.synology.me/alerts`.
+3. **Weekend & Holiday Invariance:** When scrapers execute on non-trading days and detect 0 new records, they log an informational event and terminate with `exit code 0` to prevent false positive CI/CD alerts.
+4. **In-Situ Vertical Testing:** All pipeline updates require `verify_vertical.py` execution prior to merge, enforcing 100% test coverage across live extraction, transformation, database upsert, read paths, and client DOM table rendering.
+
