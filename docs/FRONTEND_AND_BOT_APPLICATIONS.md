@@ -137,8 +137,23 @@ quant-pwa/
 
 ## 2. Discord Quant Bot (`discord-quant-bot`)
 
-### 2.1 Architecture
-The bot is built with Python and `discord.py`, listening for mentions on dedicated trading channels and returning formatted institutional options summaries.
+### 1.8 SPX Quant Levels Terminal & Historical Time-Travel Engine (`levels_view.js`)
+* **Terminal Layout & Scroll Containment:** Mounted under `#tab-levels` in `.levels-container`. Features high-contrast Bloomberg dark aesthetics, a Hero HUD metric grid (Session Close, Immediate Resistance, Immediate Support, Channel Width), an Interactive Price Ladder, a Structured Levels Table, and an Intraday 5-Minute Candlestick Chart.
+* **Historical Date Picker & Two-Way Sync:**
+  - Integrated native HTML5 date input (`#levelsDatePicker`) alongside Quick-Step buttons (`#levelsPrevBtn`, `#levelsNextBtn`) and the session dropdown (`#levelsDateSelect`).
+  - Two-way binding updates the date picker, dropdown state, and fetches quant levels and candle data synchronously.
+  - Automatically calculates business days (`getPreviousWeekday`/`getNextWeekday`) using UTC noon calculations to prevent timezone distortion across DST boundaries.
+* **Historical Spot Price & Delta Anchoring:**
+  - When inspecting past sessions (`target_date < today`), the Spot Price dynamically anchors to that day's official regular session close (e.g. `$7,717.81`), labeled as `SPX Session Close`.
+  - The Interactive Price Ladder renders an amber badge (`.ladder-spot-marker.historical`) positioned in the exact price tier of the historical close.
+  - Distance point and percentage deltas are recalculated against the historical close to maintain mathematical integrity of past market microstructure.
+* **1-Click On-Demand Missing Date Ingestion:**
+  - If navigating to a past session that has not yet been ingested into `quant_lvl_data_te`, an empty state card renders a 1-click button: `"Extract Quant Levels for YYYY-MM-DD"`.
+  - Dispatches an authenticated `POST /api/quant-levels/extract-date?target_date=YYYY-MM-DD` call to scrape and upsert that day's levels in-situ, refreshing the view automatically upon completion.
+* **Intraday Candlestick Chart Integration:**
+  - Plots 5-minute regular trading session bars (09:30 - 16:15 ET) synchronized with the selected date.
+  - Draws horizontal price corridors for active quant levels, resistance/support lines, and historical close reference marker.
+
 
 ```mermaid
 sequenceDiagram

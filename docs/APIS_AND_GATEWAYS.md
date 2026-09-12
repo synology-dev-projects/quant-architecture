@@ -277,6 +277,56 @@ sequenceDiagram
   }
   ```
 
+#### 3. Quant Levels Structured Data & Historical Spot (`GET /api/quant-levels/data`)
+* **Auth:** None (Public)
+* **Parameters:**
+  - `ticker` (string, optional, default: `"SPX"`): Underlier symbol.
+  - `as_of_date` (string, optional, format: `YYYY-MM-DD`): Target historical session.
+* **Historical Spot Anchoring:** When `as_of_date < today`, `spot_price` dynamically resolves from that session's official 5m candle close (`spot_type: "HISTORICAL_CLOSE"`, `spot_label: "SPX Session Close"`), recalculating distance deltas and immediate support/resistance accurately. When viewing today's session, live real-time spot is used (`spot_type: "LIVE"`, `spot_label: "SPX Live Spot"`).
+* **Response (`200 OK`):**
+  ```json
+  {
+    "status": "ok",
+    "as_of_date": "2026-09-11",
+    "available_dates": ["2026-09-11", "2026-09-04", "..."],
+    "spot_type": "HISTORICAL_CLOSE",
+    "spot_label": "SPX Session Close",
+    "summary": {
+      "spot_price": 7717.81,
+      "spot_type": "HISTORICAL_CLOSE",
+      "spot_label": "SPX Session Close",
+      "immediate_resistance": 7750.0,
+      "immediate_support": 7700.0,
+      "channel_width_pts": 50.0
+    },
+    "levels": [ ... ]
+  }
+  ```
+
+#### 4. Intraday Candlestick Chart Data (`GET /api/quant-levels/candles`)
+* **Auth:** None (Public)
+* **Parameters:**
+  - `ticker` (string, optional, default: `"SPX"`): Underlier symbol.
+  - `as_of_date` (string, optional, format: `YYYY-MM-DD`): Target session.
+* **Purpose:** Fetches regular session 5-minute candlestick bars (09:30 - 16:15 ET) with session summary metrics (`session_open`, `session_close`, `session_high`, `session_low`, `session_change_pts`, `session_change_pct`) and horizontal quant level corridor lines.
+* **Caching:** 24-hour cache for historical sessions; 30-second cache for active market sessions.
+
+#### 5. On-Demand Single-Day Ingestion (`POST /api/quant-levels/extract-date`)
+* **Auth:** `Authorization: Bearer <SESSION_TOKEN>` (Protected)
+* **Parameters:**
+  - `target_date` (string, query param, required, format: `YYYY-MM-DD`): Date to extract.
+* **Purpose:** Triggers targeted Mighty Networks feed post extraction and PostgreSQL upsert for a specific historical date (`run_target_date_extraction`).
+* **Response (`200 OK`):**
+  ```json
+  {
+    "status": "ok",
+    "target_date": "2026-09-10",
+    "rows_upserted": 7,
+    "message": "Successfully extracted 7 quant levels for 2026-09-10."
+  }
+  ```
+
+
 ---
 
 ## 4. Model Context Protocol (MCP) Server Specifications
