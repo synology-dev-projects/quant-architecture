@@ -135,6 +135,23 @@ quant-pwa/
 
 ---
 
+### 1.8 Watchlists Tab (`watchlist_view.js` / `watchlist.css`)
+* **Confluence Radar Design Format:** Seamless dark glass container (`rgba(18, 24, 38, 0.6)`) with high-density tabular typography and hover row highlight (`rgba(56, 189, 248, 0.06)`).
+* **Streamlined Columns:** Purged redundant indices column. Features clean, focused columns: `SYMBOL`, `SPOT`, `24H CHG`, and deletion action (`×`).
+* **Interactive Row Drilldown:** Tapping any row or the ticker badge (`.radar-ticker-btn`) navigates directly to the Cockpit tab with the ticker loaded, eliminating clumsy standalone action buttons.
+* **Compact Tab Bar & Inline Deletion:** Minimalist horizontal pill strip with inline `×` tab deletion button featuring confirmation modal safeguard.
+* **401 Session Auto-Recovery:** Displays inline re-authentication card on session expiry with one-tap unlock trigger.
+
+---
+
+### 1.9 SPX Quant Levels Tab (`levels_view.js` / `levels.css`)
+* **Ticker Exclusivity Lock:** Strictly locked to ticker `SPX` with zero arbitrary ticker inputs.
+* **Interactive Price Ladder:** Dynamic descending price ladder ordering all key levels relative to live spot price with dedicated Spot Price marker insertion.
+* **Full-Width Commentary Callouts:** Database comments rendered cleanly beneath price line in high-contrast dark-mode callout boxes (`.ladder-comment-row`), preventing wrapping or collisions across mobile (375px) and tablet (768px).
+* **Structured Levels Matrix:** Complete level attributes table with type badges (`BUY`, `SELL`, `PIVOT`), distance metrics, commentary, and source links.
+
+---
+
 ## 2. Discord Quant Bot (`discord-quant-bot`)
 
 ### 2.1 Architecture

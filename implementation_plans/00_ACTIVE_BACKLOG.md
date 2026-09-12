@@ -33,6 +33,7 @@ LOW/MED IMPACT│  [P3] Quant Level PDF Parser   │  [P2] Prometheus Metrics
 ---
 
 ## 📦 Completed & Merged Milestones (Moved to completed_archive/)
+* ✅ **Quant PWA v1.1.30 Production Promotion: Confluence Radar Watchlist & SPX Price Ladder Commentary (`PWA-02` / `v1.1.30`)** (Promoted September 2026) — Formatted Watchlists table into Confluence Radar design (removed indices column, unified drilldown), added interactive per-tab deletion with confirmation, and integrated database commentary directly into the SPX Quant Levels price ladder rows. 100% verified across 613 unit tests and promoted to Production (`master`).
 * ✅ **Quant Levels Terminal Tab & SPX Price Ladders (`PWA-01`)** (Completed September 2026) — Dedicated institutional SPX Quant Levels PWA tab with dynamic Price Ladder, Spot Price marker insertion, As-Of Date selector, Hero metric cards (Spot, Resistance, Support, Channel), and structured levels table; locked exclusively to SPX. 100% verified via gateway pytest and DOM test suites.
 * ✅ **CI-Driven Automated Living Documentation & Architecture Sync (`DEPLOY-03`)** (Completed September 2026) — Automated synchronization of `docs/` repository to `quant-architecture` and `quant-pwa` in GitHub Actions CI workflow, eliminating architecture doc drift.
 * ✅ **Automated Health-Gate & Auto-Rollback in Synology Pipeline (`DEPLOY-01`)** (Completed September 2026) — Stage 3 rollback image preservation and Stage 4 automated rollback with high-priority NTFY alerts on health or smoke test failures.
