@@ -1,70 +1,50 @@
 # 🏛️ quant-architecture
 
-> **Repository Standard:** Single Source of Truth for Quant System Architecture, Protocols, Specifications, and Living Documentation.  
-> **Hard Rule:** This repository contains **STRICTLY DOCUMENTATION, SCHEMAS, RULES, AND RFC PLANS**. It contains **ZERO EXECUTABLE APPLICATION CODE**.
+> **Repository Standard:** Single Source of Truth for As-Built Production Quant System Architecture and Living Contracts.  
+> **Hard Invariant:** This repository contains **STRICTLY LIVING PRODUCTION SYSTEM DOCUMENTATION (`docs/`)**. It contains **ZERO EXECUTABLE APPLICATION CODE** and **ZERO SHADOW AGENT / BACKLOG COPIES**.
 
 ---
 
-## 🧭 The 4-Pillar Agentic Framework
+## 🧭 System Metadata & Architecture Hierarchy (SSOT)
 
-`	ext
-quant-architecture/
-├── 🧠 GEMINI.md                                  # PILLAR 1: The Kernel Directives & Invariants
-├── 🎯 .agents/
-│   ├── rules/                                   # PILLAR 2: Scoped Modular Domain Rules
-│   │   ├── feature-development-protocol.md      # 6-Phase Lifecycle & Git gates
-│   │   ├── telemetry-and-logging-standards.md   # tr-xxxxxx & ring buffer logs
-│   │   ├── oracle-concurrency.md                # UUID staging tables & connection pooling
-│   │   ├── api-security.md                      # HMAC session auth & fail-closed security
-│   │   ├── bug-remediation-protocol.md          # 4-step bug remediation loop
-│   │   └── pipeline-standards.md                # Scraper rate-limits & DTE Greek math
-│   └── skills/                                  # PILLAR 4: Context-Isolated Subagents
-│       ├── architecture-review-agent/SKILL.md   # Enterprise Systems Architect (1,000 DAU)
-│       ├── no-mistakes-reviewer/SKILL.md        # Adversarial Code Reviewer (Phase 5a)
-│       └── captain-orchestrator/SKILL.md        # Multi-repo Orchestrator
-├── 📖 docs/                                     # PILLAR 3: Just-In-Time Living Contracts
-│   ├── APIS_AND_GATEWAYS.md                     # Split-Model Router, SSE & Tool Schemas
-│   ├── ARCHITECTURE_OVERVIEW.md                 # System Microservices Topology Map
-│   ├── DATABASE_AND_DATA_MODELS.md              # Oracle Schemas & Table Catalog
-│   ├── ETL_PIPELINES_AND_INGESTION.md           # Pipeline Runbooks & Crons
-│   ├── FRONTEND_AND_BOT_APPLICATIONS.md         # PWA Bloomberg UI Standards & Diagnostics HUD
-│   ├── INFRASTRUCTURE_AND_CICD.md               # Docker Compose, Ports & Synology NAS
-│   └── MAINTENANCE_COST_AND_MAINTAINABILITY_REVIEW.md
-└── 📋 implementation_plans/                     # Ranked Engineering Roadmap (Priority & Impact)
-    ├── 00_ACTIVE_BACKLOG.md                     # Master Living Backlog & Effort Matrix
-    ├── README.md                                # Implementation Directory Navigator
-    ├── p0_strategic_architecture/               # Strategic Architecture Refactors
-    │   └── P0_UNIFIED_MODULAR_MONOLITH.md       # Collapse Gateway + GexDex into Monolith
-    ├── p1_high_impact_resilience/               # Critical Concurrency Fixes
-    │   └── P1_IBKR_ASYNC_SOCKET_LIFECYCLE.md    # Prevent IBKR Client ID Cron Lockouts
-    ├── p2_medium_impact_observability/          # Metrics & Telemetry
-    │   └── P2_CENTRALIZED_LOGGING_METRICS.md    # Prometheus /metrics Exporter & JSON Logs
-    ├── p3_low_medium_ingestion/                 # Extensibility Parsers
-    │   └── P3_QUANT_LEVEL_PDF_PARSER.md         # Morning Report PDF Attachment Parser
-    └── completed_archive/                       # Zero Completed Items in Active Backlog!
-        └── historical_code_reviews/             # Archived Historical Audit Reports
-`
+To prevent metadata drift across multi-repo development, metadata is partitioned strictly across three tiers:
+
+```
+Quant System/ (Workspace Root)
+├── 🧠 .agents/                                  # TIER 1: Operational Agent Brain & Skills (SSOT)
+│   ├── rules/                                   # Domain rules, protocols & concurrency guards
+│   └── skills/                                  # Antigravity skill runbooks (timescale, repro, docker, etc.)
+├── 📋 implementation_plans/                     # TIER 2: Active Roadmap & Task Registry (SSOT)
+│   ├── 00_ACTIVE_BACKLOG.md                     # Categorized backlog (FEAT-xxx, ENH-xxx, BUG-xxx)
+│   ├── p0_... to p3_...                         # Detailed design RFCs
+│   └── completed_archive/                       # Historical archived specs
+├── 📋 HANDOFF.md                                # Immediate session state & resume prompt (SSOT)
+└── 🏛️ quant-architecture/                       # TIER 3: As-Built Production Architecture (This Repo)
+    └── 📖 docs/                                 # Living Production Architecture Contracts
+        ├── ARCHITECTURE_OVERVIEW.md             # System Microservices Topology Map
+        ├── DATABASE_AND_DATA_MODELS.md          # TimescaleDB & Postgres Schemas & Catalog
+        ├── ETL_PIPELINES_AND_INGESTION.md       # Pipeline Runbooks, Schedulers & Crons
+        ├── APIS_AND_GATEWAYS.md                 # Split-Model Router, SSE & Tool Schemas
+        ├── FRONTEND_AND_BOT_APPLICATIONS.md     # PWA Bloomberg UI Standards & Diagnostics HUD
+        ├── INFRASTRUCTURE_AND_CICD.md           # Docker Compose, Ports & Synology NAS
+        └── MAINTENANCE_COST_AND_MAINTAINABILITY_REVIEW.md
+```
 
 ---
 
-## 🎯 Active Implementation Roadmap
+## 📖 Production Architecture Contracts (`docs/`)
 
-| Priority | ID | Component | Summary | Impact |
-| :---: | :---: | :--- | :--- | :---: |
-| 🏛️ **P0** | ARCH-01 | quant-pwa & gexdex-api | **[Unified Modular Monolith](implementation_plans/p0_strategic_architecture/P0_UNIFIED_MODULAR_MONOLITH.md)** | **STRATEGIC** (10/10 Architecture) |
-| 🔴 **P1** | PIPE-01 | ibkr-historical-data-pipeline | **[IBKR Socket Lifecycle Context Manager](implementation_plans/p1_high_impact_resilience/P1_IBKR_ASYNC_SOCKET_LIFECYCLE.md)** | **HIGH** (Production Reliability) |
-| 🟠 **P2** | OBSV-01 | gexdex-api & gateway | **[Prometheus Exporter & JSON Logs](implementation_plans/p2_medium_impact_observability/P2_CENTRALIZED_LOGGING_METRICS.md)** | **MEDIUM** (Observability) |
-| 🟡 **P3** | PIPE-02 | quant-level-pipeline | **[PDF Attachment Morning Report Parser](implementation_plans/p3_low_medium_ingestion/P3_QUANT_LEVEL_PDF_PARSER.md)** | **LOW-MED** (Extensibility) |
+The [`docs/`](docs/) directory is the authoritative specification of the live production system running on the Synology NAS (`:8095`):
+
+1. **[Architecture Overview](docs/ARCHITECTURE_OVERVIEW.md)**: End-to-end service interaction, network routing, and hardware boundaries.
+2. **[Database & Data Models](docs/DATABASE_AND_DATA_MODELS.md)**: Relational tables, TimescaleDB hypertables, indexing, and compression policies.
+3. **[ETL Pipelines & Ingestion](docs/ETL_PIPELINES_AND_INGESTION.md)**: Daily batch scrapers, rate limits, IBKR connectors, and data freshness gates.
+4. **[APIs & Gateways](docs/APIS_AND_GATEWAYS.md)**: FastAPI endpoints, Server-Sent Events (SSE), and MCP tool definitions.
+5. **[Frontend & Bot Applications](docs/FRONTEND_AND_BOT_APPLICATIONS.md)**: PWA Bloomberg dark UI specifications, Canvas strike distributions, and caching policies.
+6. **[Infrastructure & CI/CD](docs/INFRASTRUCTURE_AND_CICD.md)**: Synology NAS container configuration, memory caps (< 350MB), and GitHub Actions workflows.
 
 ---
 
-## 🤖 Autonomous Multi-Agent Engineering Architecture
-
-The platform is built, maintained, and verified by an autonomous, multi-agent engineering fleet operating at **L8 Autonomous Engineering Maturity**:
-
-* 🧭 **Captain Orchestrator:** Master state machine coordinating triage, fleet dispatch, and deployment.
-* 👥 **Execution Fleet (The Crew):** Specialized Builder subagents (`backend_agent`, `frontend_agent`, `devops_agent`) implementing features with local in-situ test enforcement.
-* 🛡️ **Adversarial Review Council:** Independent Phase 5 Reviewers (`no-mistakes-reviewer` for quality/SRE and `architecture_review_agent` for 1,000 DAU scalability) operating on strict **Zero Unacknowledged Findings** governance.
-* 🚦 **Human-in-the-Loop Gates:** 4 hard stop gates ensuring zero unreviewed code changes and zero unapproved production merges.
-
-👉 **Read the Complete Operations Manual:** **[`.agents/README.md`](.agents/README.md)** (Architecture, 4-tier memory hierarchy, lifecycle state machines, and human approval gates).
+## 🔄 Production Update Invariant
+* This repository is **frozen during everyday development** on `develop`/`develop2`.
+* It is updated and synchronized **strictly when code is promoted to Production (`master`)** with explicit human authorization.
