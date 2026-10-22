@@ -12,8 +12,8 @@
 | Category | 🚀 Features | ⚡ Enhancements | 🛡️ Bugs | Total |
 | :--- | :---: | :---: | :---: | :---: |
 | **Active / Backlog** | 3 | 3 | 2 | **8** |
-| **Completed / Done** | 5 | 5 | 2 | **12** |
-| **Total Tracked** | 8 | 8 | 4 | **20** |
+| **Completed / Done** | 5 | 5 | 3 | **13** |
+| **Total Tracked** | 8 | 8 | 5 | **21** |
 
 ---
 
@@ -74,6 +74,7 @@
 ### 3. 🛡️ Completed Bug Fixes (`bugs/completed/`)
 | ID | Title & Release Summary | Completed Release | Date | Ticket Spec |
 | :---: | :--- | :---: | :---: | :--- |
+| `BUG-003`       | Pipeline Upstream Dependency Synchronization & Table Freshness Fallback | `v1.1.42` | 2026-10-21 | [BUG-003](bugs/completed/BUG-003-pipeline-upstream-dependency-sync.md) |
 | `BUG-DEPLOY-01`| Automated Health-Gate & Auto-Rollback in Synology Pipeline | `v1.1.19` | 2026-09-14 | [BUG-DEPLOY-01](bugs/completed/BUG-DEPLOY-01-auto-rollback-health-gate.md) |
 | `BUG-FLOW-EDGE`| Options Flow Passcode Auth & .EDGE Verification Gate | `v1.1.40` | 2026-10-18 | [BUG-FLOW-EDGE](bugs/completed/BUG-FLOW-EDGE-auth-passcode-verification.md) |
 
