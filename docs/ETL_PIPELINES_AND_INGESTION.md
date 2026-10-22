@@ -116,3 +116,30 @@ graph LR
 3. **Weekend & Holiday Invariance:** When scrapers execute on non-trading days and detect 0 new records, they log an informational event and terminate with `exit code 0` to prevent false positive CI/CD alerts.
 4. **In-Situ Vertical Testing:** All pipeline updates require `verify_vertical.py` execution prior to merge, enforcing 100% test coverage across live extraction, transformation, database upsert, read paths, and client DOM table rendering.
 
+
+
+---
+
+## 4. Pipeline Registry & Manifest Specification
+
+All quant pipelines publish a standard `pipeline.yaml` root manifest parsed by `common_lib.orchestration.manifest.PipelineManifest`.
+
+```yaml
+name: unusual_option_flow
+display_name: Options Flow Ingestion
+description: Scrapes and cleans institutional sweeps and options flow
+version: 1.0.0
+category: options
+enabled: true            # Active production toggle (set to false to exclude from daily cycle)
+upstream: []
+target_tables:
+  - unusual_option_flow_te
+timeout_sec: 600
+schedule: "00 9 * * 1-5"
+runner: common_lib.flow.runner:run_daily_incremental
+```
+
+### Manifest Schema & Lifecycle Invariants
+1. **Dynamic Manifest Discovery:** `common_lib.orchestration.registry.discover_pipeline_manifests` dynamically scans repository roots and builds the execution DAG using `graphlib.TopologicalSorter`.
+2. **Enabled Lifecycle Flag:** Manifests must specify `enabled: bool` (default `true`). Setting `enabled: false` safely excludes the pipeline from the production daily DAG cycle while preserving the manifest in source control for in-progress features.
+3. **Defensive Runner Isolation:** `common_lib.orchestration.executor.execute_single_pipeline` isolates entrypoint import and runner resolution errors, recording a pipeline failure and firing priority alerts without crashing the orchestrator process.
