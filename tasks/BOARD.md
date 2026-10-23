@@ -12,8 +12,8 @@
 | Category | 🚀 Features | ⚡ Enhancements | 🛡️ Bugs | Total |
 | :--- | :---: | :---: | :---: | :---: |
 | **Active / Backlog** | 3 | 5 | 2 | **10** |
-| **Completed / Done** | 5 | 5 | 4 | **14** |
-| **Total Tracked** | 8 | 10 | 6 | **24** |
+| **Completed / Done** | 5 | 5 | 5 | **15** |
+| **Total Tracked** | 8 | 10 | 7 | **25** |
 
 ---
 
@@ -74,6 +74,7 @@
 ### 3. 🛡️ Completed Bug Fixes (`bugs/completed/`)
 | ID | Title & Release Summary | Completed Release | Date | Ticket Spec |
 | :---: | :--- | :---: | :---: | :--- |
+| `BUG-005`       | IBKR GEX/DEX Extraction Accuracy, Constituent Separation & CBOE OCC OI Integration | `v1.1.44` | 2026-10-23 | [BUG-005](bugs/completed/BUG-005-ibkr-gexdex-accuracy-and-separation.md) |
 | `BUG-003`       | Pipeline Upstream Dependency Synchronization & Table Freshness Fallback | `v1.1.42` | 2026-10-21 | [BUG-003](bugs/completed/BUG-003-pipeline-upstream-dependency-sync.md) |
 | `BUG-DEPLOY-01`| Automated Health-Gate & Auto-Rollback in Synology Pipeline | `v1.1.19` | 2026-09-14 | [BUG-DEPLOY-01](bugs/completed/BUG-DEPLOY-01-auto-rollback-health-gate.md) |
 | `BUG-FLOW-EDGE`| Options Flow Passcode Auth & .EDGE Verification Gate | `v1.1.40` | 2026-10-18 | [BUG-FLOW-EDGE](bugs/completed/BUG-FLOW-EDGE-auth-passcode-verification.md) |
