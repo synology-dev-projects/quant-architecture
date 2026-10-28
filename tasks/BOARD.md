@@ -12,8 +12,8 @@
 | Category | 🚀 Features | ⚡ Enhancements | 🛡️ Bugs | Total |
 | :--- | :---: | :---: | :---: | :---: |
 | **Active / Backlog** | 3 | 5 | 2 | **10** |
-| **Completed / Done** | 5 | 5 | 6 | **16** |
-| **Total Tracked** | 8 | 10 | 8 | **26** |
+| **Completed / Done** | 5 | 5 | 7 | **17** |
+| **Total Tracked** | 8 | 10 | 9 | **27** |
 
 ---
 
