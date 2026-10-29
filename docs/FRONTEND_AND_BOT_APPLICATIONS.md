@@ -120,6 +120,7 @@ quant-pwa/
     * **Live Streaming Synthesis (`/api/cockpit/synthesis/stream`):** Streams real-time AI strategic synthesis combining options gamma positioning with multi-week institutional tape flow via SSE with markdown rendering and typing animation.
   - **Panel 2: Interactive Exposure Chart & Key Levels Strip:**
     * **Zero-Dependency Canvas Engine:** High-DPI HTML5 canvas rendering Call vs. Put strike distribution.
+    * **TradingEdge | IBKR Dual Data Source Switcher:** Seamless tab toggle (`.source-toggle`) in chart header allowing traders to switch between TradingEdge market data and live IBKR CBOE delayed options chain data. Both sources deliver identical 25-strike distribution layouts, reactive Key Levels updates (`Spot Price`, `Zero Flip`, `Call Wall`, `Put Wall`), and zero-latency client switching from in-memory cache.
     * **Net GEX | Net DEX Interactive Toggle:** Instant client-side switching between Gamma Exposure ($/pt) and Delta Exposure ($/share) distributions without upstream re-fetching.
     * **Key Levels HUD Strip:** Monospace indicator ribbon rendering Spot Price, Zero Gamma Flip point, Call Resistance Wall, and Put Support Wall.
   - **Panel 3: 30-Day Options Flow Table:**
@@ -131,7 +132,7 @@ quant-pwa/
       4. `[Puts]`: Bullish/Bearish put prints (`BUY_PUT`, `SELL_PUT`).
       5. `[Unusual OI ⚠️]`: Institutional prints exceeding prevailing open interest (`IS_UNUSUAL_OI = 1`).
     * **Tri-State Column Sorting & Secondary Tie-Breaker:** Full support for ascending/descending/natural order cycling with secondary tie-breaker sorting by premium descending.
-* **Automated In-Situ UI Test Harness (`test_cockpit_view.js`):** Comprehensive mock DOM probe validating 49 automated assertions across search ergonomics, 3-panel mounting, filter chip transitions, GEX/DEX toggling, tri-state sorting, and localStorage persistence.
+* **Automated In-Situ UI Test Harness (`test_cockpit_view.js`):** Comprehensive mock DOM probe validating 99 automated assertions across search ergonomics, 3-panel mounting, filter chip transitions, GEX/DEX toggling, TradingEdge/IBKR data source switching, tri-state sorting, and localStorage persistence.
 
 ---
 

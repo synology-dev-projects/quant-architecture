@@ -157,12 +157,12 @@ sequenceDiagram
 
 ### 3.6 Ticker Cockpit Endpoints (`/api/cockpit/*`)
 
-#### 3.6.1 Cockpit Unified Data Aggregator (`GET /api/cockpit/data`)
-* **Endpoint:** `GET /api/cockpit/data?ticker=<SYMBOL>`
+#### 3.6.1 Cockpit Unified Data Aggregator (`GET /api/cockpit/data` / `POST /api/cockpit/data`)
+* **Endpoint:** `GET /api/cockpit/data?ticker=<SYMBOL>` or `POST /api/cockpit/data` (`{"ticker": "<SYMBOL>"}`)
 * **Auth:** Bearer Session Token (`Authorization: Bearer <token>`)
 * **Parameters:**
   - `ticker` (string, required): US Equity/Index symbol (e.g. `NVDA`, `SPY`, `TSLA`).
-* **Execution Latency:** Sub-100ms in-process aggregation.
+* **Execution Latency:** Sub-100ms in-process aggregation with concurrent `asyncio.gather()` queries across TradingEdge GEX, 30D Flow, and live IBKR CBOE delayed options chain with 15-minute in-memory caching.
 * **Payload Structure (`200 OK`):**
   ```json
   {
@@ -175,6 +175,16 @@ sequenceDiagram
       "put_wall": 220.0,
       "net_gex": 209912341389.29,
       "net_dex": 25546999485.99,
+      "gamma_regime": "Positive (Long Gamma / Volatility Dampening)",
+      "strike_distribution": { ... }
+    },
+    "ibkr_gex": {
+      "spot_price": 217.50,
+      "zero_gex_level": 212.00,
+      "call_wall": 220.0,
+      "put_wall": 215.0,
+      "net_gex": 185430210.12,
+      "net_dex": 19430120.45,
       "gamma_regime": "Positive (Long Gamma / Volatility Dampening)",
       "strike_distribution": { ... }
     },

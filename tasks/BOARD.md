@@ -12,8 +12,8 @@
 | Category | 🚀 Features | ⚡ Enhancements | 🛡️ Bugs | Total |
 | :--- | :---: | :---: | :---: | :---: |
 | **Active / Backlog** | 3 | 5 | 2 | **10** |
-| **Completed / Done** | 5 | 5 | 7 | **17** |
-| **Total Tracked** | 8 | 10 | 9 | **27** |
+| **Completed / Done** | 6 | 5 | 7 | **18** |
+| **Total Tracked** | 9 | 10 | 9 | **28** |
 
 ---
 
@@ -56,6 +56,7 @@
 ### 1. 🚀 Completed Features (`features/completed/`)
 | ID | Title & Release Summary | Completed Release | Date | Ticket Spec |
 | :---: | :--- | :---: | :---: | :--- |
+| `FEAT-PWA-02` | Cockpit GEX/DEX Data Source Switcher (TradingEdge & IBKR) | `v1.1.45` | 2026-10-29 | [FEAT-PWA-02](features/completed/FEAT-PWA-02-cockpit-ibkr-tab.md) |
 | `FEAT-PWA-01` | Quant Levels Terminal Tab & SPX Price Ladders | `v1.1.20` | 2026-09-15 | [FEAT-PWA-01](features/completed/FEAT-PWA-01-quant-levels-tab.md) |
 | `FEAT-MCP-01` | Polymorphic Dual-Transport (POST & GET) MCP Server | `v1.1.18` | 2026-09-08 | [FEAT-MCP-01](features/completed/FEAT-MCP-01-polymorphic-transport.md) |
 | `FEAT-AGENT-01`| Quant AI Agent Evaluation & Benchmarking Harness | `v1.1.15` | 2026-09-02 | [FEAT-AGENT-01](features/completed/FEAT-AGENT-01-eval-benchmark-harness.md) |
