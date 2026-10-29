@@ -176,7 +176,7 @@ sequenceDiagram
       "net_gex": 209912341389.29,
       "net_dex": 25546999485.99,
       "gamma_regime": "Positive (Long Gamma / Volatility Dampening)",
-      "strike_distribution": { ... }
+      "strike_distribution": { "is_fallback": false, "strikes": [ ... ] }
     },
     "ibkr_gex": {
       "spot_price": 217.50,
@@ -186,7 +186,7 @@ sequenceDiagram
       "net_gex": 185430210.12,
       "net_dex": 19430120.45,
       "gamma_regime": "Positive (Long Gamma / Volatility Dampening)",
-      "strike_distribution": { ... }
+      "strike_distribution": { "is_fallback": false, "strikes": [ ... ] }
     },
     "flow": {
       "records": [ ... ],
@@ -354,7 +354,7 @@ The Gateway exposes standard Model Context Protocol (MCP) Universal Dual-Transpo
    - **Date Range Overload (`/flow <START_DATE> to <END_DATE>`):** Queries multi-day date spans (e.g. `/flow 2026-08-17 to 2026-08-21`) and renders the aggregated institutional ledger.
    - **Specific Date Overload (`/flow <YYYY-MM-DD>`):** Queries a single historical session.
    - **Fast LLM Routing:** Dispatched through Tier 1 `gemini-3.5-flash-lite` with `thinking_budget=0` for ultra-fast **sub-second tool decision & streaming TTFT (<1.0s)**.
-3. **`get_strike_distribution(ticker: str, min_strike: float, max_strike: float)`**: Returns array of discrete strike-by-strike GEX and DEX bars for custom client-side visualization.
+3. **`get_strike_distribution(ticker: str, min_strike: float, max_strike: float)`**: Returns array of discrete strike-by-strike GEX and DEX bars for custom client-side visualization with explicit provenance indicator (`is_fallback: bool`).
 4. **`get_market_status()`**: Returns current Eastern Time, market session state (`REGULAR_HOURS`, `PRE_MARKET`, `AFTER_HOURS`, `WEEKEND_CLOSED`), and time to next open/close.
 5. **`macro_schedule()`**: Queries key upcoming macroeconomic releases (CPI, FOMC rate decisions, PPI, Non-Farm Payrolls, GDP) and implied market volatility catalyst dates.
 
