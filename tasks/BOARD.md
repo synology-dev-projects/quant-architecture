@@ -75,6 +75,7 @@
 ### 3. 🛡️ Completed Bug Fixes (`bugs/completed/`)
 | ID | Title & Release Summary | Completed Release | Date | Ticket Spec |
 | :---: | :--- | :---: | :---: | :--- |
+| BUG-010       | Build Version Increment & Parity Automation Life-Cycle | 1.2.1 | 2026-10-30 | [BUG-010](bugs/completed/BUG-010-build-increment-automation.md) |
 | `BUG-009`       | GLXY Spot Price Discrepancy & CBOE Underlying Price Extraction | `v1.1.45` | 2026-10-29 | [BUG-009](bugs/completed/BUG-009-glxy-spot-price-cboe-fix.md) |
 | `BUG-008`       | Cockpit IBKR GEX/DEX Tab Silent Fallback & SciPy Import Failure | `v1.1.45` | 2026-10-29 | [BUG-008](bugs/completed/BUG-008-ibkr-strike-fallback-fix.md) |
 | `BUG-005`       | IBKR GEX/DEX Extraction Accuracy, Constituent Separation & CBOE OCC OI Integration | `v1.1.44` | 2026-10-23 | [BUG-005](bugs/completed/BUG-005-ibkr-gexdex-accuracy-and-separation.md) |
